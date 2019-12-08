@@ -49,8 +49,9 @@ mod device_impl;
 pub mod prelude;
 mod register_access;
 use register_access::{BitFlags, Register};
+mod boot_mode;
 mod traits;
-pub use traits::Ccs811Device;
+pub use traits::{Ccs811AppMode, Ccs811BootMode, Ccs811Device};
 mod types;
 pub use types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeError, SlaveAddr};
 

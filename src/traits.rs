@@ -17,3 +17,17 @@ pub trait Ccs811Device: private::Sealed {
     /// Get the firmware bootloader verion (major, minor, trivial)
     fn firmware_bootloader_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
 }
+
+/// Methods available when on application mode
+pub trait Ccs811AppMode: private::Sealed {}
+
+/// Methods available when on boot mode
+pub trait Ccs811BootMode: private::Sealed {
+    /// Boot/App mode change error
+    type ModeChangeError;
+    /// Application mode type
+    type AppModeType;
+
+    /// Start App mode
+    fn app_start(self) -> Result<Self::AppModeType, Self::ModeChangeError>;
+}

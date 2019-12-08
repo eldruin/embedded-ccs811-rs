@@ -6,8 +6,9 @@ use hal::{
 };
 
 use ccs811::prelude::*;
+use ccs811::Error;
 mod common;
-use common::{destroy, new, Register, DEV_ADDR};
+use common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
 
 #[test]
 fn can_create_and_destroy() {
@@ -50,4 +51,34 @@ fn can_get_fw_boot_version() {
     let mut sensor = new(&transactions, nwake);
     assert_eq!((1, 2, 0x34), sensor.firmware_bootloader_version().unwrap());
     destroy(sensor);
+}
+
+#[test]
+fn can_start_app_mode() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_VALID]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_START]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let sensor = new(&transactions, nwake);
+    let sensor = sensor.app_start().ok().unwrap();
+    destroy(sensor);
+}
+
+#[test]
+fn cannot_start_app_mode_invalid_app() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [I2cTrans::write_read(
+        DEV_ADDR,
+        vec![Register::STATUS],
+        vec![0],
+    )];
+    let sensor = new(&transactions, nwake);
+    let result = sensor.app_start().err().unwrap();
+    match result.error {
+        Error::NoValidApp => (),
+        _ => panic!("Invalid error"),
+    }
+    destroy(result.dev);
 }

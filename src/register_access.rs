@@ -7,6 +7,7 @@ impl Register {
     pub const HW_VERSION: u8 = 0x21;
     pub const FW_BOOT_VERSION: u8 = 0x23;
     pub const ERROR_ID: u8 = 0xE0;
+    pub const APP_START: u8 = 0xF4;
 }
 
 pub(crate) struct BitFlags {}
@@ -61,6 +62,13 @@ where
     ) -> Result<(), ErrorAwake<E>> {
         self.i2c
             .write_read(self.address, &[register], data)
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
+
+    pub(crate) fn write_register_no_data(&mut self, register: u8) -> Result<(), ErrorAwake<E>> {
+        self.i2c
+            .write(self.address, &[register])
             .map_err(ErrorAwake::I2C)?;
         self.check_status_error()
     }
