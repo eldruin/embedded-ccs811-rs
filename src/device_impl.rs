@@ -69,7 +69,7 @@ where
     type Error = ErrorAwake<E>;
 
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
-        let status = self.read_register_1byte(Register::STATUS)?;
+        let status = self.read_status()?;
         Ok((status & BitFlags::APP_VALID) != 0)
     }
 

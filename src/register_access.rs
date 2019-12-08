@@ -26,18 +26,22 @@ where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
     pub(crate) fn check_status_error(&mut self) -> Result<(), ErrorAwake<E>> {
+        self.read_status().map(drop)
+    }
+
+    pub(crate) fn read_status(&mut self) -> Result<u8, ErrorAwake<E>> {
         let mut data = [0];
         self.i2c
             .write_read(self.address, &[Register::STATUS], &mut data)
             .map_err(ErrorAwake::I2C)?;
-        if (data[0] & BitFlags::ERROR) != 0 {
+        let status = data[0];
+        if (status & BitFlags::ERROR) != 0 {
             self.i2c
                 .write_read(self.address, &[Register::ERROR_ID], &mut data)
                 .map_err(ErrorAwake::I2C)?;
-            get_errors(data[0]).map_err(ErrorAwake::Device)
-        } else {
-            Ok(())
+            get_errors(data[0]).map_err(ErrorAwake::Device)?;
         }
+        Ok(status)
     }
 
     pub(crate) fn read_register_1byte(&mut self, register: u8) -> Result<u8, ErrorAwake<E>> {
