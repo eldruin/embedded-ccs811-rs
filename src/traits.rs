@@ -16,6 +16,9 @@ pub trait Ccs811Device: private::Sealed {
 
     /// Get the firmware bootloader verion (major, minor, trivial)
     fn firmware_bootloader_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
+
+    /// Get the firmware application verion (major, minor, trivial)
+    fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
 }
 
 /// Methods available when on application mode

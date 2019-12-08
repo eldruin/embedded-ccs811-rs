@@ -49,6 +49,13 @@ get_test!(
     vec![0x12, 0x34],
     (1, 2, 0x34)
 );
+get_test!(
+    can_get_fw_app_version,
+    firmware_application_version,
+    FW_APP_VERSION,
+    vec![0x12, 0x34],
+    (1, 2, 0x34)
+);
 
 #[test]
 fn can_start_app_mode() {

@@ -102,6 +102,11 @@ where
         let version = self.read_register_2bytes(Register::FW_BOOT_VERSION)?;
         Ok(((version[0] & 0xF0) >> 4, version[0] & 0xF, version[1]))
     }
+
+    fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error> {
+        let version = self.read_register_2bytes(Register::FW_APP_VERSION)?;
+        Ok(((version[0] & 0xF0) >> 4, version[0] & 0xF, version[1]))
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, MODE> Ccs811Device for Ccs811<I2C, NWAKE, MODE>
@@ -125,5 +130,9 @@ where
 
     fn firmware_bootloader_version(&mut self) -> Result<(u8, u8, u8), Self::Error> {
         self.on_awaken(|s| s.dev.firmware_bootloader_version())
+    }
+
+    fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error> {
+        self.on_awaken(|s| s.dev.firmware_application_version())
     }
 }

@@ -6,6 +6,7 @@ impl Register {
     pub const HW_ID: u8 = 0x20;
     pub const HW_VERSION: u8 = 0x21;
     pub const FW_BOOT_VERSION: u8 = 0x23;
+    pub const FW_APP_VERSION: u8 = 0x24;
     pub const ERROR_ID: u8 = 0xE0;
     pub const APP_START: u8 = 0xF4;
 }
