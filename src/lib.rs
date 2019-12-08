@@ -43,15 +43,53 @@
 #![no_std]
 
 extern crate embedded_hal as hal;
+use core::marker::PhantomData;
 
 mod device_impl;
+pub mod prelude;
+mod register_access;
+use register_access::{BitFlags, Register};
+mod traits;
+pub use traits::Ccs811Device;
 mod types;
-pub use types::{Error, SlaveAddr};
+pub use types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeError, SlaveAddr};
 
 /// CCS811 device driver
+///
+/// Wrapper arount AwakeCcs811 which handles the nWAKE pin
 #[derive(Debug)]
-pub struct Ccs811<I2C> {
+pub struct Ccs811<I2C, NWAKE, MODE> {
+    dev: Ccs811Awake<I2C, MODE>,
+    n_wake_pin: NWAKE,
+    _mode: PhantomData<MODE>,
+}
+
+/// Already awake CCS811 device driver
+///
+/// This can be used when the nWAKE pin is connected directly to GND or when
+/// handling the nWAKE manually instead of using the `Ccs811` wrapper type.
+#[derive(Debug)]
+pub struct Ccs811Awake<I2C, MODE> {
     /// The concrete I²C device implementation.
     i2c: I2C,
     address: u8,
+    _mode: PhantomData<MODE>,
+}
+
+/// Mode marker
+pub mod mode {
+    /// Boot mode
+    pub struct Boot(());
+    /// App mode
+    pub struct App(());
+}
+
+mod private {
+    use super::{mode, Ccs811, Ccs811Awake};
+    pub trait Sealed {}
+
+    impl Sealed for mode::Boot {}
+    impl Sealed for mode::App {}
+    impl<I2C, NWAKE, MODE> Sealed for Ccs811<I2C, NWAKE, MODE> {}
+    impl<I2C, MODE> Sealed for Ccs811Awake<I2C, MODE> {}
 }
