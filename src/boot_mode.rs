@@ -9,9 +9,9 @@ where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
     type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
-    type AppModeType = Ccs811Awake<I2C, mode::App>;
+    type TargetType = Ccs811Awake<I2C, mode::App>;
 
-    fn app_start(mut self) -> Result<Self::AppModeType, Self::ModeChangeError> {
+    fn app_start(mut self) -> Result<Self::TargetType, Self::ModeChangeError> {
         match self.has_valid_app() {
             Err(e) => Err(ModeChangeError::new(self, e)),
             Ok(is_valid) => {
@@ -34,7 +34,7 @@ where
     NWAKE: OutputPin<Error = PinE>,
 {
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
-    type AppModeType = Ccs811<I2C, NWAKE, mode::App>;
+    type TargetType = Ccs811<I2C, NWAKE, mode::App>;
 
     fn app_start(self) -> Result<Self::TargetType, Self::ModeChangeError> {
         self.wrap_mode_change(|s| s.app_start())
