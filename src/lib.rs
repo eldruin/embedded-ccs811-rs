@@ -45,7 +45,7 @@
 extern crate embedded_hal as hal;
 use core::marker::PhantomData;
 
-mod device_impl;
+mod common_impl;
 pub mod prelude;
 mod register_access;
 use register_access::{BitFlags, Register};
