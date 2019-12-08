@@ -1,4 +1,3 @@
-use core::marker::PhantomData;
 use hal::digital::v2::OutputPin;
 use {
     hal, mode, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device, Error, ErrorAwake,
@@ -14,27 +13,14 @@ where
 
     fn app_start(mut self) -> Result<Self::AppModeType, Self::ModeChangeError> {
         match self.has_valid_app() {
-            Err(e) => Err(ModeChangeError {
-                dev: self,
-                error: e,
-            }),
+            Err(e) => Err(ModeChangeError::new(self, e)),
             Ok(is_valid) => {
                 if !is_valid {
-                    Err(ModeChangeError {
-                        dev: self,
-                        error: ErrorAwake::NoValidApp,
-                    })
+                    Err(ModeChangeError::new(self, ErrorAwake::NoValidApp))
                 } else {
                     match self.write_register_no_data(Register::APP_START) {
-                        Err(e) => Err(ModeChangeError {
-                            dev: self,
-                            error: e,
-                        }),
-                        Ok(_) => Ok(Ccs811Awake {
-                            i2c: self.i2c,
-                            address: self.address,
-                            _mode: PhantomData,
-                        }),
+                        Err(e) => Err(ModeChangeError::new(self, e)),
+                        Ok(_) => Ok(Ccs811Awake::create(self.i2c, self.address)),
                     }
                 }
             }
@@ -52,10 +38,7 @@ where
 
     fn app_start(mut self) -> Result<Self::AppModeType, Self::ModeChangeError> {
         if let Err(e) = self.n_wake_pin.set_low() {
-            return Err(ModeChangeError {
-                dev: self,
-                error: Error::Pin(e),
-            });
+            return Err(ModeChangeError::new(self, Error::Pin(e)));
         }
         let Ccs811 {
             dev,
@@ -70,39 +53,19 @@ where
                     address,
                     _mode,
                 }) => Err(ModeChangeError {
-                    dev: Ccs811 {
-                        dev: Ccs811Awake {
-                            i2c,
-                            address,
-                            _mode: PhantomData,
-                        },
-                        n_wake_pin,
-                        _mode: PhantomData,
-                    },
+                    dev: Ccs811::create(i2c, n_wake_pin, address),
                     error: Error::Pin(e),
                 }),
                 Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                    dev: Ccs811 {
-                        dev,
-                        n_wake_pin,
-                        _mode: PhantomData,
-                    },
+                    dev: Ccs811::from_awake_dev(dev, n_wake_pin),
                     error: error.into(),
                 }),
             };
         }
         match result {
-            Ok(dev) => Ok(Ccs811 {
-                dev,
-                n_wake_pin,
-                _mode: PhantomData,
-            }),
+            Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin)),
             Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                dev: Ccs811 {
-                    dev,
-                    n_wake_pin,
-                    _mode: PhantomData,
-                },
+                dev: Ccs811::from_awake_dev(dev, n_wake_pin),
                 error: error.into(),
             }),
         }

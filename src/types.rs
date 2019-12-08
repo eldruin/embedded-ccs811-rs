@@ -107,6 +107,12 @@ pub struct ModeChangeError<E, DEV> {
     pub error: E,
 }
 
+impl<E, DEV> ModeChangeError<E, DEV> {
+    pub(crate) fn new(dev: DEV, error: E) -> Self {
+        ModeChangeError { dev, error }
+    }
+}
+
 /// Possible slave addresses
 #[derive(Debug, Clone, Copy)]
 pub enum SlaveAddr {

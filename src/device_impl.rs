@@ -9,8 +9,18 @@ impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
     ///
     /// See `Ccs811Awake` for the case where the nWAKE pin is not used.
     pub fn new(i2c: I2C, n_wake_pin: NWAKE, address: SlaveAddr) -> Self {
+        Self::create(i2c, n_wake_pin, address.addr())
+    }
+}
+
+impl<I2C, NWAKE, MODE> Ccs811<I2C, NWAKE, MODE> {
+    pub(crate) fn create(i2c: I2C, n_wake_pin: NWAKE, address: u8) -> Self {
+        Self::from_awake_dev(Ccs811Awake::create(i2c, address), n_wake_pin)
+    }
+
+    pub(crate) fn from_awake_dev(dev: Ccs811Awake<I2C, MODE>, n_wake_pin: NWAKE) -> Self {
         Ccs811 {
-            dev: Ccs811Awake::new(i2c, address),
+            dev,
             n_wake_pin,
             _mode: PhantomData,
         }
@@ -20,9 +30,15 @@ impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
 impl<I2C> Ccs811Awake<I2C, mode::Boot> {
     /// Create new instance of an already awake CCS811 device.
     pub fn new(i2c: I2C, address: SlaveAddr) -> Self {
+        Self::create(i2c, address.addr())
+    }
+}
+
+impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
+    pub(crate) fn create(i2c: I2C, address: u8) -> Self {
         Ccs811Awake {
             i2c,
-            address: address.addr(),
+            address: address,
             _mode: PhantomData,
         }
     }
