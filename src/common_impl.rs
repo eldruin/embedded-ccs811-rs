@@ -1,7 +1,8 @@
 use core::marker::PhantomData;
 use hal::digital::v2::OutputPin;
 use {
-    hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake, Register, SlaveAddr,
+    hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake, ModeChangeError,
+    Register, SlaveAddr,
 };
 
 impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
@@ -75,6 +76,52 @@ where
         };
         self.n_wake_pin.set_high().map_err(Error::Pin)?;
         result
+    }
+
+    pub(crate) fn wrap_mode_change<TMODE, F>(
+        mut self,
+        f: F,
+    ) -> Result<Ccs811<I2C, NWAKE, TMODE>, ModeChangeError<Error<CommE, PinE>, Self>>
+    where
+        F: FnOnce(
+            Ccs811Awake<I2C, MODE>,
+        ) -> Result<
+            Ccs811Awake<I2C, TMODE>,
+            ModeChangeError<ErrorAwake<CommE>, Ccs811Awake<I2C, MODE>>,
+        >,
+    {
+        if let Err(e) = self.n_wake_pin.set_low() {
+            return Err(ModeChangeError::new(self, Error::Pin(e)));
+        }
+        let Ccs811 {
+            dev,
+            mut n_wake_pin,
+            _mode,
+        } = self;
+        let result = f(dev);
+        if let Err(e) = n_wake_pin.set_high() {
+            return match result {
+                Ok(Ccs811Awake {
+                    i2c,
+                    address,
+                    _mode,
+                }) => Err(ModeChangeError {
+                    dev: Ccs811::create(i2c, n_wake_pin, address),
+                    error: Error::Pin(e),
+                }),
+                Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
+                    dev: Ccs811::from_awake_dev(dev, n_wake_pin),
+                    error: error.into(),
+                }),
+            };
+}
+        match result {
+            Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin)),
+            Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
+                dev: Ccs811::from_awake_dev(dev, n_wake_pin),
+                error: error.into(),
+            }),
+        }
     }
 }
 

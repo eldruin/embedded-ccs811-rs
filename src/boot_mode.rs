@@ -36,38 +36,7 @@ where
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
     type AppModeType = Ccs811<I2C, NWAKE, mode::App>;
 
-    fn app_start(mut self) -> Result<Self::AppModeType, Self::ModeChangeError> {
-        if let Err(e) = self.n_wake_pin.set_low() {
-            return Err(ModeChangeError::new(self, Error::Pin(e)));
-        }
-        let Ccs811 {
-            dev,
-            mut n_wake_pin,
-            _mode,
-        } = self;
-        let result = dev.app_start();
-        if let Err(e) = n_wake_pin.set_high() {
-            return match result {
-                Ok(Ccs811Awake {
-                    i2c,
-                    address,
-                    _mode,
-                }) => Err(ModeChangeError {
-                    dev: Ccs811::create(i2c, n_wake_pin, address),
-                    error: Error::Pin(e),
-                }),
-                Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                    dev: Ccs811::from_awake_dev(dev, n_wake_pin),
-                    error: error.into(),
-                }),
-            };
-        }
-        match result {
-            Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin)),
-            Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                dev: Ccs811::from_awake_dev(dev, n_wake_pin),
-                error: error.into(),
-            }),
-        }
+    fn app_start(self) -> Result<Self::TargetType, Self::ModeChangeError> {
+        self.wrap_mode_change(|s| s.app_start())
     }
 }
