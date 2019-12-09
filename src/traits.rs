@@ -1,4 +1,5 @@
 use crate::private;
+use nb;
 
 /// General CCS811 methods
 pub trait Ccs811Device: private::Sealed {
@@ -33,6 +34,8 @@ pub trait Ccs811AppMode: private::Sealed {}
 
 /// Methods available when on boot mode
 pub trait Ccs811BootMode: private::Sealed {
+    /// Error type
+    type Error;
     /// Boot/App mode change error
     type ModeChangeError;
     /// Application mode type
@@ -40,4 +43,10 @@ pub trait Ccs811BootMode: private::Sealed {
 
     /// Start application mode
     fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError>;
+
+    /// Verify application.
+    ///
+    /// NOTE: After the first call, 70ms must be waited before calling again to
+    /// poll until completion.
+    fn verify_application(&mut self) -> nb::Result<(), Self::Error>;
 }

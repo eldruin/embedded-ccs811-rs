@@ -107,3 +107,30 @@ fn can_do_software_reset() {
     let sensor = sensor.software_reset().ok().unwrap();
     destroy(sensor);
 }
+
+#[test]
+fn can_verify_app() {
+    let nwake = PinMock::new(&[
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+    ]);
+    let transactions = [
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_VERIFY]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_VERIFY]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor
+        .verify_application()
+        .expect_err("Should have returned nb::Error::WouldBlock");
+    sensor
+        .verify_application()
+        .expect_err("Should have returned nb::Error::WouldBlock");
+    sensor.verify_application().unwrap();
+    destroy(sensor);
+}

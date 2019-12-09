@@ -8,6 +8,7 @@ impl Register {
     pub const FW_BOOT_VERSION: u8 = 0x23;
     pub const FW_APP_VERSION: u8 = 0x24;
     pub const ERROR_ID: u8 = 0xE0;
+    pub const APP_VERIFY: u8 = 0xF3;
     pub const APP_START: u8 = 0xF4;
     pub const SW_RESET: u8 = 0xFF;
 }
@@ -15,6 +16,7 @@ impl Register {
 pub(crate) struct BitFlags {}
 impl BitFlags {
     pub const APP_VALID: u8 = 1 << 4;
+    pub const APP_VERIFY: u8 = 1 << 5;
     pub const ERROR: u8 = 1;
     pub const WRITE_REG_INVALID: u8 = 1;
     pub const READ_REG_INVALID: u8 = 1 << 1;

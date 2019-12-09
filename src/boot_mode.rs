@@ -1,14 +1,16 @@
 use crate::hal::digital::v2::OutputPin;
 use crate::{
-    hal, mode, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device, Error, ErrorAwake,
+    hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device, Error, ErrorAwake,
     ModeChangeError, Register,
 };
+use nb;
 
 impl<I2C, E> Ccs811BootMode for Ccs811Awake<I2C, mode::Boot>
 where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
-    type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
+    type Error = ErrorAwake<E>;
+    type ModeChangeError = ModeChangeError<Self::Error, Self>;
     type TargetType = Ccs811Awake<I2C, mode::App>;
 
     fn start_application(mut self) -> Result<Self::TargetType, Self::ModeChangeError> {
@@ -26,6 +28,31 @@ where
             }
         }
     }
+
+    fn verify_application(&mut self) -> nb::Result<(), Self::Error> {
+        let status = self.read_status().map_err(nb::Error::Other)?;
+        let verified = (status & BitFlags::APP_VERIFY) != 0;
+        if !verified {
+            if self.is_verifying {
+                Err(nb::Error::WouldBlock)
+            } else {
+                let result = self
+                    .i2c
+                    .write(self.address, &[Register::APP_VERIFY])
+                    .map_err(ErrorAwake::I2C);
+                match result {
+                    Ok(_) => {
+                        self.is_verifying = true;
+                        Err(nb::Error::WouldBlock)
+                    }
+                    Err(e) => Err(nb::Error::Other(e)),
+                }
+            }
+        } else {
+            self.is_verifying = false;
+            Ok(())
+        }
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE> Ccs811BootMode for Ccs811<I2C, NWAKE, mode::Boot>
@@ -33,10 +60,15 @@ where
     I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
 {
-    type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
+    type Error = Error<CommE, PinE>;
+    type ModeChangeError = ModeChangeError<Self::Error, Self>;
     type TargetType = Ccs811<I2C, NWAKE, mode::App>;
 
     fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError> {
         self.wrap_mode_change(|s| s.start_application())
+    }
+
+    fn verify_application(&mut self) -> nb::Result<(), Self::Error> {
+        self.on_awaken_nb(|s| s.dev.verify_application())
     }
 }

@@ -4,6 +4,7 @@ use crate::{
     Register, SlaveAddr,
 };
 use core::marker::PhantomData;
+use nb;
 
 impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
     /// Create new instance of the CCS811 device.
@@ -40,6 +41,7 @@ impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
         Ccs811Awake {
             i2c,
             address,
+            is_verifying: false,
             _mode: PhantomData,
         }
     }
@@ -76,7 +78,7 @@ where
         (self.dev.destroy(), self.n_wake_pin)
     }
 
-    fn on_awaken<T, F>(&mut self, f: F) -> Result<T, Error<CommE, PinE>>
+    pub(crate) fn on_awaken<T, F>(&mut self, f: F) -> Result<T, Error<CommE, PinE>>
     where
         F: FnOnce(&mut Self) -> Result<T, ErrorAwake<CommE>>,
     {
@@ -89,8 +91,29 @@ where
         result
     }
 
+    pub(crate) fn on_awaken_nb<T, F>(&mut self, f: F) -> nb::Result<T, Error<CommE, PinE>>
+    where
+        F: FnOnce(&mut Self) -> nb::Result<T, ErrorAwake<CommE>>,
+    {
+        self.n_wake_pin
+            .set_low()
+            .map_err(Error::Pin)
+            .map_err(nb::Error::Other)?;
+        let result = match f(self) {
+            Ok(v) => Ok(v),
+            Err(nb::Error::Other(e)) => Err(nb::Error::Other(e.into())),
+            Err(nb::Error::WouldBlock) => Err(nb::Error::WouldBlock),
+        };
+        self.n_wake_pin
+            .set_high()
+            .map_err(Error::Pin)
+            .map_err(nb::Error::Other)?;
+        result
+    }
+
     // Note: defining a type for the result would require inherent
     // associated items: https://github.com/rust-lang/rust/issues/8995
+    // Note 2: is_verifying is always false after a mode change
     #[allow(clippy::type_complexity)]
     pub(crate) fn wrap_mode_change<TMODE, F>(
         mut self,
@@ -110,6 +133,7 @@ where
         let Ccs811 {
             dev,
             mut n_wake_pin,
+
             _mode,
         } = self;
         let result = f(dev);
@@ -118,6 +142,7 @@ where
                 Ok(Ccs811Awake {
                     i2c,
                     address,
+                    is_verifying: _,
                     _mode,
                 }) => Err(ModeChangeError {
                     dev: Ccs811::create(i2c, n_wake_pin, address),
@@ -171,6 +196,7 @@ where
         Ok(((version[0] & 0xF0) >> 4, version[0] & 0xF, version[1]))
     }
 
+    // Note: is_verifying is false after a reset
     fn software_reset(mut self) -> Result<Self::BootModeType, Self::ModeChangeError> {
         match self.write_sw_reset() {
             Err(e) => Err(ModeChangeError::new(self, e)),
