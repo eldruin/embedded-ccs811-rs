@@ -11,7 +11,7 @@ where
     type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
     type TargetType = Ccs811Awake<I2C, mode::App>;
 
-    fn app_start(mut self) -> Result<Self::TargetType, Self::ModeChangeError> {
+    fn start_application(mut self) -> Result<Self::TargetType, Self::ModeChangeError> {
         match self.has_valid_app() {
             Err(e) => Err(ModeChangeError::new(self, e)),
             Ok(is_valid) => {
@@ -36,7 +36,7 @@ where
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
     type TargetType = Ccs811<I2C, NWAKE, mode::App>;
 
-    fn app_start(self) -> Result<Self::TargetType, Self::ModeChangeError> {
-        self.wrap_mode_change(|s| s.app_start())
+    fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError> {
+        self.wrap_mode_change(|s| s.start_application())
     }
 }

@@ -62,7 +62,7 @@ fn can_start_app_mode() {
         I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
     ];
     let sensor = new(&transactions, nwake);
-    let sensor = sensor.app_start().ok().unwrap();
+    let sensor = sensor.start_application().ok().unwrap();
     destroy(sensor);
 }
 
@@ -75,7 +75,7 @@ fn cannot_start_app_mode_invalid_app() {
         vec![0],
     )];
     let sensor = new(&transactions, nwake);
-    let result = sensor.app_start().err().unwrap();
+    let result = sensor.start_application().err().unwrap();
     match result.error {
         Error::NoValidApp => (),
         _ => panic!("Invalid error"),

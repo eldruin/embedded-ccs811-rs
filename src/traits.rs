@@ -38,6 +38,6 @@ pub trait Ccs811BootMode: private::Sealed {
     /// Application mode type
     type TargetType;
 
-    /// Start App mode
-    fn app_start(self) -> Result<Self::TargetType, Self::ModeChangeError>;
+    /// Start application mode
+    fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError>;
 }
