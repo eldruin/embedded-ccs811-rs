@@ -53,6 +53,31 @@ where
             Ok(())
         }
     }
+
+    fn erase_application(&mut self) -> nb::Result<(), Self::Error> {
+        let status = self.read_status().map_err(nb::Error::Other)?;
+        let erased = (status & BitFlags::APP_ERASE) != 0;
+        if !erased {
+            if self.in_progress == ActionInProgress::Erase {
+                Err(nb::Error::WouldBlock)
+            } else {
+                let result = self
+                    .i2c
+                    .write(self.address, &[Register::APP_ERASE, 0xE7, 0xA7, 0xE6, 0x09])
+                    .map_err(ErrorAwake::I2C);
+                match result {
+                    Ok(_) => {
+                        self.in_progress = ActionInProgress::Erase;
+                        Err(nb::Error::WouldBlock)
+                    }
+                    Err(e) => Err(nb::Error::Other(e)),
+                }
+            }
+        } else {
+            self.in_progress = ActionInProgress::None;
+            Ok(())
+        }
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE> Ccs811BootMode for Ccs811<I2C, NWAKE, mode::Boot>
@@ -70,5 +95,9 @@ where
 
     fn verify_application(&mut self) -> nb::Result<(), Self::Error> {
         self.on_awaken_nb(|s| s.dev.verify_application())
+    }
+
+    fn erase_application(&mut self) -> nb::Result<(), Self::Error> {
+        self.on_awaken_nb(|s| s.dev.erase_application())
     }
 }

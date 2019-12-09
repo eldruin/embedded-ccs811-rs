@@ -134,3 +134,30 @@ fn can_verify_app() {
     sensor.verify_application().unwrap();
     destroy(sensor);
 }
+
+#[test]
+fn can_erase_app() {
+    let nwake = PinMock::new(&[
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+    ]);
+    let transactions = [
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_ERASE, 0xE7, 0xA7, 0xE6, 0x09]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_ERASE]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor
+        .erase_application()
+        .expect_err("Should have returned nb::Error::WouldBlock");
+    sensor
+        .erase_application()
+        .expect_err("Should have returned nb::Error::WouldBlock");
+    sensor.erase_application().unwrap();
+    destroy(sensor);
+}

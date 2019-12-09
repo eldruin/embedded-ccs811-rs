@@ -82,6 +82,7 @@ pub struct Ccs811Awake<I2C, MODE> {
 enum ActionInProgress {
     None,
     Verification,
+    Erase,
 }
 
 /// Mode marker

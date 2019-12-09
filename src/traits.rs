@@ -49,4 +49,10 @@ pub trait Ccs811BootMode: private::Sealed {
     /// NOTE: After the first call, 70ms must be waited before calling again to
     /// poll until completion.
     fn verify_application(&mut self) -> nb::Result<(), Self::Error>;
+
+    /// Erase application.
+    ///
+    /// NOTE: After the first call, 500ms must be waited before calling again to
+    /// poll until completion.
+    fn erase_application(&mut self) -> nb::Result<(), Self::Error>;
 }
