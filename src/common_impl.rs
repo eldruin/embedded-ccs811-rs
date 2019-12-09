@@ -54,6 +54,17 @@ where
         self.i2c
     }
 }
+impl<I2C, E, MODE> Ccs811Awake<I2C, MODE>
+where
+    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+{
+    pub(crate) fn write_sw_reset(&mut self) -> Result<(), ErrorAwake<E>> {
+        self.i2c
+            .write(self.address, &[Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A])
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
+}
 
 impl<I2C, CommE, PinE, NWAKE, MODE> Ccs811<I2C, NWAKE, MODE>
 where
@@ -114,7 +125,7 @@ where
                     error: error.into(),
                 }),
             };
-}
+        }
         match result {
             Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin)),
             Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
@@ -130,6 +141,8 @@ where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
     type Error = ErrorAwake<E>;
+    type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
+    type BootModeType = Ccs811Awake<I2C, mode::Boot>;
 
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
         let status = self.read_status()?;
@@ -154,6 +167,13 @@ where
         let version = self.read_register_2bytes(Register::FW_APP_VERSION)?;
         Ok(((version[0] & 0xF0) >> 4, version[0] & 0xF, version[1]))
     }
+
+    fn software_reset(mut self) -> Result<Self::BootModeType, Self::ModeChangeError> {
+        match self.write_sw_reset() {
+            Err(e) => Err(ModeChangeError::new(self, e)),
+            Ok(_) => Ok(Ccs811Awake::create(self.i2c, self.address)),
+        }
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, MODE> Ccs811Device for Ccs811<I2C, NWAKE, MODE>
@@ -162,6 +182,8 @@ where
     NWAKE: OutputPin<Error = PinE>,
 {
     type Error = Error<CommE, PinE>;
+    type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
+    type BootModeType = Ccs811<I2C, NWAKE, mode::Boot>;
 
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
         self.on_awaken(|s| s.dev.has_valid_app())
@@ -181,5 +203,9 @@ where
 
     fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error> {
         self.on_awaken(|s| s.dev.firmware_application_version())
+    }
+
+    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError> {
+        self.wrap_mode_change(|s| s.software_reset())
     }
 }

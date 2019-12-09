@@ -4,6 +4,10 @@ use private;
 pub trait Ccs811Device: private::Sealed {
     /// Error type
     type Error;
+    /// Boot/App mode change error
+    type ModeChangeError;
+    /// Boot mode type
+    type BootModeType;
 
     /// Check if a valid application firmware is loaded.
     fn has_valid_app(&mut self) -> Result<bool, Self::Error>;
@@ -19,6 +23,9 @@ pub trait Ccs811Device: private::Sealed {
 
     /// Get the firmware application verion (major, minor, trivial)
     fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
+
+    /// Restart the device in boot mode.
+    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError>;
 }
 
 /// Methods available when on application mode

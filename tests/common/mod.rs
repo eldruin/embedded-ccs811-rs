@@ -15,6 +15,7 @@ impl Register {
     pub const FW_APP_VERSION: u8 = 0x24;
     pub const ERROR_ID: u8 = 0xE0;
     pub const APP_START: u8 = 0xF4;
+    pub const SW_RESET: u8 = 0xFF;
 }
 
 pub struct BitFlags {}
