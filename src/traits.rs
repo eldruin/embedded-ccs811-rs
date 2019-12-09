@@ -1,4 +1,4 @@
-use private;
+use crate::private;
 
 /// General CCS811 methods
 pub trait Ccs811Device: private::Sealed {

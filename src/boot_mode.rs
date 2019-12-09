@@ -1,5 +1,5 @@
-use hal::digital::v2::OutputPin;
-use {
+use crate::hal::digital::v2::OutputPin;
+use crate::{
     hal, mode, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device, Error, ErrorAwake,
     ModeChangeError, Register,
 };

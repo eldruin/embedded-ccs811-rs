@@ -48,12 +48,12 @@ use core::marker::PhantomData;
 mod common_impl;
 pub mod prelude;
 mod register_access;
-use register_access::{BitFlags, Register};
+use crate::register_access::{BitFlags, Register};
 mod boot_mode;
 mod traits;
-pub use traits::{Ccs811AppMode, Ccs811BootMode, Ccs811Device};
+pub use crate::traits::{Ccs811AppMode, Ccs811BootMode, Ccs811Device};
 mod types;
-pub use types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeError, SlaveAddr};
+pub use crate::types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeError, SlaveAddr};
 
 /// CCS811 device driver
 ///

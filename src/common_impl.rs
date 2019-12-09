@@ -1,9 +1,9 @@
-use core::marker::PhantomData;
-use hal::digital::v2::OutputPin;
-use {
+use crate::hal::digital::v2::OutputPin;
+use crate::{
     hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake, ModeChangeError,
     Register, SlaveAddr,
 };
+use core::marker::PhantomData;
 
 impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
     /// Create new instance of the CCS811 device.
@@ -39,7 +39,7 @@ impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
     pub(crate) fn create(i2c: I2C, address: u8) -> Self {
         Ccs811Awake {
             i2c,
-            address: address,
+            address,
             _mode: PhantomData,
         }
     }
@@ -89,6 +89,9 @@ where
         result
     }
 
+    // Note: defining a type for the result would require inherent
+    // associated items: https://github.com/rust-lang/rust/issues/8995
+    #[allow(clippy::type_complexity)]
     pub(crate) fn wrap_mode_change<TMODE, F>(
         mut self,
         f: F,

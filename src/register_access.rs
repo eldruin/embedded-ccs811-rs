@@ -1,4 +1,4 @@
-use {hal, Ccs811Awake, DeviceError, DeviceErrors, ErrorAwake};
+use crate::{hal, Ccs811Awake, DeviceError, DeviceErrors, ErrorAwake};
 
 pub(crate) struct Register {}
 impl Register {

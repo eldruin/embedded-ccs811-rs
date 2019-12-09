@@ -1,14 +1,10 @@
-extern crate ccs811;
-extern crate embedded_hal_mock as hal;
-use hal::{
+use ccs811::{prelude::*, DeviceError, Error};
+use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
-
-use ccs811::prelude::*;
-use ccs811::{DeviceError, Error};
 mod common;
-use common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
+use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
 
 macro_rules! expect_err {
     ($name:ident, $error_id:expr, $invalid_write:expr, $invalid_read:expr, $invalid_meas:expr,

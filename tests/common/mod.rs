@@ -1,5 +1,5 @@
 use ccs811::{mode, Ccs811, SlaveAddr};
-use hal::{
+use embedded_hal_mock::{
     i2c::{Mock as I2cMock, Transaction as I2cTrans},
     pin::Mock as PinMock,
 };
