@@ -1,7 +1,7 @@
 use crate::hal::digital::v2::OutputPin;
 use crate::{
-    hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake, ModeChangeError,
-    Register, SlaveAddr,
+    hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake,
+    ModeChangeError, Register, SlaveAddr,
 };
 use core::marker::PhantomData;
 use nb;
@@ -41,7 +41,7 @@ impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
         Ccs811Awake {
             i2c,
             address,
-            is_verifying: false,
+            in_progress: ActionInProgress::None,
             _mode: PhantomData,
         }
     }
@@ -142,7 +142,7 @@ where
                 Ok(Ccs811Awake {
                     i2c,
                     address,
-                    is_verifying: _,
+                    in_progress: _,
                     _mode,
                 }) => Err(ModeChangeError {
                     dev: Ccs811::create(i2c, n_wake_pin, address),

@@ -1,7 +1,7 @@
 use crate::hal::digital::v2::OutputPin;
 use crate::{
-    hal, mode, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device, Error, ErrorAwake,
-    ModeChangeError, Register,
+    hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
+    Error, ErrorAwake, ModeChangeError, Register,
 };
 use nb;
 
@@ -33,7 +33,7 @@ where
         let status = self.read_status().map_err(nb::Error::Other)?;
         let verified = (status & BitFlags::APP_VERIFY) != 0;
         if !verified {
-            if self.is_verifying {
+            if self.in_progress == ActionInProgress::Verification {
                 Err(nb::Error::WouldBlock)
             } else {
                 let result = self
@@ -42,14 +42,14 @@ where
                     .map_err(ErrorAwake::I2C);
                 match result {
                     Ok(_) => {
-                        self.is_verifying = true;
+                        self.in_progress = ActionInProgress::Verification;
                         Err(nb::Error::WouldBlock)
                     }
                     Err(e) => Err(nb::Error::Other(e)),
                 }
             }
         } else {
-            self.is_verifying = false;
+            self.in_progress = ActionInProgress::None;
             Ok(())
         }
     }

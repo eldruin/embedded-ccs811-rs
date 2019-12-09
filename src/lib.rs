@@ -74,8 +74,14 @@ pub struct Ccs811Awake<I2C, MODE> {
     /// The concrete I²C device implementation.
     i2c: I2C,
     address: u8,
-    is_verifying: bool,
+    in_progress: ActionInProgress,
     _mode: PhantomData<MODE>,
+}
+
+#[derive(Debug, PartialEq)]
+enum ActionInProgress {
+    None,
+    Verification,
 }
 
 /// Mode marker
