@@ -4,7 +4,7 @@ use embedded_hal_mock::{
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
 mod common;
-use crate::common::{destroy, new, Register, DEV_ADDR};
+use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
 
 #[test]
 fn can_create_and_destroy() {
@@ -53,18 +53,26 @@ get_test!(
     (1, 2, 0x34)
 );
 
-#[test]
-fn can_get_invalid_app() {
-    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
-    let transactions = [I2cTrans::write_read(
-        DEV_ADDR,
-        vec![Register::STATUS],
-        vec![0],
-    )];
-    let mut sensor = new(&transactions, nwake);
-    assert!(!sensor.has_valid_app().unwrap());
-    destroy(sensor);
+macro_rules! read_status_test {
+    ($name:ident, $method:ident, $expected:expr, $value: expr) => {
+        #[test]
+        fn $name() {
+            let nwake =
+                PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+            let transactions = [I2cTrans::write_read(
+                DEV_ADDR,
+                vec![Register::STATUS],
+                vec![$value],
+            )];
+            let mut sensor = new(&transactions, nwake);
+            assert_eq!($expected, sensor.$method().unwrap());
+            destroy(sensor);
+        }
+    };
 }
+
+read_status_test!(can_get_invalid_app, has_valid_app, false, 0);
+read_status_test!(can_get_valid_app, has_valid_app, true, BF::APP_VALID);
 
 #[test]
 fn can_do_software_reset() {
