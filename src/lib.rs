@@ -57,7 +57,7 @@ pub use crate::types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeE
 
 /// CCS811 device driver
 ///
-/// Convenience wrapper arount AwakeCcs811 which handles waking up the device on each operation.
+/// Convenience wrapper arount `Ccs811Awake` which handles waking up the device on each operation.
 #[derive(Debug)]
 pub struct Ccs811<I2C, NWAKE, WAKEDELAY, MODE> {
     dev: Ccs811Awake<I2C, MODE>,
