@@ -49,11 +49,14 @@ mod common_impl;
 pub mod prelude;
 mod register_access;
 use crate::register_access::{BitFlags, Register};
+mod app_mode;
 mod boot_mode;
 mod traits;
 pub use crate::traits::{Ccs811AppMode, Ccs811BootMode, Ccs811Device};
 mod types;
-pub use crate::types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeError, SlaveAddr};
+pub use crate::types::{
+    DeviceError, DeviceErrors, Error, ErrorAwake, MeasurementMode, ModeChangeError, SlaveAddr,
+};
 
 /// CCS811 device driver
 ///
@@ -75,6 +78,7 @@ pub struct Ccs811Awake<I2C, MODE> {
     /// The concrete I²C device implementation.
     i2c: I2C,
     address: u8,
+    meas_mode_reg: u8,
     in_progress: ActionInProgress,
     _mode: PhantomData<MODE>,
 }

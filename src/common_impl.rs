@@ -46,6 +46,7 @@ impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
         Ccs811Awake {
             i2c,
             address,
+            meas_mode_reg: 0,
             in_progress: ActionInProgress::None,
             _mode: PhantomData,
         }

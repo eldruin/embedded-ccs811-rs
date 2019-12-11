@@ -1,4 +1,4 @@
-use crate::private;
+use crate::{private, MeasurementMode};
 use nb;
 
 /// General CCS811 methods
@@ -30,7 +30,17 @@ pub trait Ccs811Device: private::Sealed {
 }
 
 /// Methods available when on application mode
-pub trait Ccs811AppMode: private::Sealed {}
+pub trait Ccs811AppMode: private::Sealed {
+    /// Error type
+    type Error;
+
+    /// Set the measurement mode
+    ///
+    /// NOTE: When changing to a new mode with a lower sample rate,
+    /// place the device in `Idle` mode for at least 10 minutes before
+    /// enabling the new mode.
+    fn set_mode(&mut self, mode: MeasurementMode) -> Result<(), Self::Error>;
+}
 
 /// Methods available when on boot mode
 pub trait Ccs811BootMode: private::Sealed {

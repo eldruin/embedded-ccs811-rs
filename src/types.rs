@@ -113,6 +113,25 @@ impl<E, DEV> ModeChangeError<E, DEV> {
     }
 }
 
+/// Measurement modes.
+///
+/// NOTE: When changing to a new mode with a lower sample rate,
+/// place the device in `Idle` mode for at least 10 minutes before
+/// enabling the new mode.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MeasurementMode {
+    /// Idle. Measurements are disabled. (Mode 0)
+    Idle,
+    /// Constant power mode. IAQ measurement every second. (Mode 1)
+    ConstantPower1s,
+    /// Pulse heating mode. IAQ measurement every 10 seconds. (Mode 2)
+    PulseHeating10s,
+    /// Low power pulse heating mode. IAQ measurement every 60 seconds. (Mode 3)
+    LowPowerPulseHeating60s,
+    /// Constant power mode. IAQ measurement every 250ms. (Mode 4)
+    ConstantPower250ms,
+}
+
 /// Possible slave addresses
 #[derive(Debug, Clone, Copy)]
 pub enum SlaveAddr {

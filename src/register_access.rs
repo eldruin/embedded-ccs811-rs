@@ -3,6 +3,7 @@ use crate::{hal, Ccs811Awake, DeviceError, DeviceErrors, ErrorAwake};
 pub(crate) struct Register {}
 impl Register {
     pub const STATUS: u8 = 0x00;
+    pub const MEAS_MODE: u8 = 0x01;
     pub const HW_ID: u8 = 0x20;
     pub const HW_VERSION: u8 = 0x21;
     pub const FW_BOOT_VERSION: u8 = 0x23;
@@ -75,6 +76,17 @@ where
     pub(crate) fn write_register_no_data(&mut self, register: u8) -> Result<(), ErrorAwake<E>> {
         self.i2c
             .write(self.address, &[register])
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
+
+    pub(crate) fn write_register_1byte(
+        &mut self,
+        register: u8,
+        data: u8,
+    ) -> Result<(), ErrorAwake<E>> {
+        self.i2c
+            .write(self.address, &[register, data])
             .map_err(ErrorAwake::I2C)?;
         self.check_status_error()
     }
