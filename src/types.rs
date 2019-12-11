@@ -81,7 +81,7 @@ impl IndexMut<DeviceError> for DeviceErrors {
 }
 
 /// Errors reported by the device
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DeviceError {
     /// I2C write to an invalid register reported by device.
     InvalidRegisterWrite,
