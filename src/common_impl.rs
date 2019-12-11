@@ -1,4 +1,4 @@
-use crate::hal::digital::v2::OutputPin;
+use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake,
     ModeChangeError, Register, SlaveAddr,
@@ -6,24 +6,29 @@ use crate::{
 use core::marker::PhantomData;
 use nb;
 
-impl<I2C, NWAKE> Ccs811<I2C, NWAKE, mode::Boot> {
+impl<I2C, NWAKE, WAKEDELAY> Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot> {
     /// Create new instance of the CCS811 device.
     ///
     /// See `Ccs811Awake` for the case where the nWAKE pin is not used.
-    pub fn new(i2c: I2C, n_wake_pin: NWAKE, address: SlaveAddr) -> Self {
-        Self::create(i2c, n_wake_pin, address.addr())
+    pub fn new(i2c: I2C, address: SlaveAddr, n_wake_pin: NWAKE, wake_delay: WAKEDELAY) -> Self {
+        Self::create(i2c, address.addr(), n_wake_pin, wake_delay)
     }
 }
 
-impl<I2C, NWAKE, MODE> Ccs811<I2C, NWAKE, MODE> {
-    pub(crate) fn create(i2c: I2C, n_wake_pin: NWAKE, address: u8) -> Self {
-        Self::from_awake_dev(Ccs811Awake::create(i2c, address), n_wake_pin)
+impl<I2C, NWAKE, WAKEDELAY, MODE> Ccs811<I2C, NWAKE, WAKEDELAY, MODE> {
+    pub(crate) fn create(i2c: I2C, address: u8, n_wake_pin: NWAKE, wake_delay: WAKEDELAY) -> Self {
+        Self::from_awake_dev(Ccs811Awake::create(i2c, address), n_wake_pin, wake_delay)
     }
 
-    pub(crate) fn from_awake_dev(dev: Ccs811Awake<I2C, MODE>, n_wake_pin: NWAKE) -> Self {
+    pub(crate) fn from_awake_dev(
+        dev: Ccs811Awake<I2C, MODE>,
+        n_wake_pin: NWAKE,
+        wake_delay: WAKEDELAY,
+    ) -> Self {
         Ccs811 {
             dev,
             n_wake_pin,
+            wake_delay,
             _mode: PhantomData,
         }
     }
@@ -68,14 +73,16 @@ where
     }
 }
 
-impl<I2C, CommE, PinE, NWAKE, MODE> Ccs811<I2C, NWAKE, MODE>
+impl<I2C, CommE, PinE, NWAKE, WAKEDELAY, MODE> Ccs811<I2C, NWAKE, WAKEDELAY, MODE>
 where
     I2C: hal::blocking::i2c::Write<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
+    WAKEDELAY: DelayUs<u8>,
 {
-    /// Destroy driver instance, return I²C bus instance and nWAKE pin.
-    pub fn destroy(self) -> (I2C, NWAKE) {
-        (self.dev.destroy(), self.n_wake_pin)
+    /// Destroy driver instance, return I²C bus, nWAKE pin
+    /// and wake delay instances.
+    pub fn destroy(self) -> (I2C, NWAKE, WAKEDELAY) {
+        (self.dev.destroy(), self.n_wake_pin, self.wake_delay)
     }
 
     pub(crate) fn on_awaken<T, F>(&mut self, f: F) -> Result<T, Error<CommE, PinE>>
@@ -83,11 +90,13 @@ where
         F: FnOnce(&mut Self) -> Result<T, ErrorAwake<CommE>>,
     {
         self.n_wake_pin.set_low().map_err(Error::Pin)?;
+        self.wake_delay.delay_us(50);
         let result = match f(self) {
             Ok(v) => Ok(v),
             Err(e) => Err(e.into()),
         };
         self.n_wake_pin.set_high().map_err(Error::Pin)?;
+        self.wake_delay.delay_us(20);
         result
     }
 
@@ -99,6 +108,7 @@ where
             .set_low()
             .map_err(Error::Pin)
             .map_err(nb::Error::Other)?;
+        self.wake_delay.delay_us(50);
         let result = match f(self) {
             Ok(v) => Ok(v),
             Err(nb::Error::Other(e)) => Err(nb::Error::Other(e.into())),
@@ -108,6 +118,7 @@ where
             .set_high()
             .map_err(Error::Pin)
             .map_err(nb::Error::Other)?;
+        self.wake_delay.delay_us(20);
         result
     }
 
@@ -118,7 +129,7 @@ where
     pub(crate) fn wrap_mode_change<TMODE, F>(
         mut self,
         f: F,
-    ) -> Result<Ccs811<I2C, NWAKE, TMODE>, ModeChangeError<Error<CommE, PinE>, Self>>
+    ) -> Result<Ccs811<I2C, NWAKE, WAKEDELAY, TMODE>, ModeChangeError<Error<CommE, PinE>, Self>>
     where
         F: FnOnce(
             Ccs811Awake<I2C, MODE>,
@@ -130,34 +141,31 @@ where
         if let Err(e) = self.n_wake_pin.set_low() {
             return Err(ModeChangeError::new(self, Error::Pin(e)));
         }
+        self.wake_delay.delay_us(50);
         let Ccs811 {
             dev,
             mut n_wake_pin,
-
-            _mode,
+            mut wake_delay,
+            ..
         } = self;
         let result = f(dev);
         if let Err(e) = n_wake_pin.set_high() {
             return match result {
-                Ok(Ccs811Awake {
-                    i2c,
-                    address,
-                    in_progress: _,
-                    _mode,
-                }) => Err(ModeChangeError {
-                    dev: Ccs811::create(i2c, n_wake_pin, address),
+                Ok(Ccs811Awake { i2c, address, .. }) => Err(ModeChangeError {
+                    dev: Ccs811::create(i2c, address, n_wake_pin, wake_delay),
                     error: Error::Pin(e),
                 }),
                 Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                    dev: Ccs811::from_awake_dev(dev, n_wake_pin),
+                    dev: Ccs811::from_awake_dev(dev, n_wake_pin, wake_delay),
                     error: error.into(),
                 }),
             };
         }
+        wake_delay.delay_us(20);
         match result {
-            Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin)),
+            Ok(dev) => Ok(Ccs811::from_awake_dev(dev, n_wake_pin, wake_delay)),
             Err(ModeChangeError { dev, error }) => Err(ModeChangeError {
-                dev: Ccs811::from_awake_dev(dev, n_wake_pin),
+                dev: Ccs811::from_awake_dev(dev, n_wake_pin, wake_delay),
                 error: error.into(),
             }),
         }
@@ -205,14 +213,15 @@ where
     }
 }
 
-impl<I2C, CommE, PinE, NWAKE, MODE> Ccs811Device for Ccs811<I2C, NWAKE, MODE>
+impl<I2C, CommE, PinE, NWAKE, WAKEDELAY, MODE> Ccs811Device for Ccs811<I2C, NWAKE, WAKEDELAY, MODE>
 where
     I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
+    WAKEDELAY: DelayUs<u8>,
 {
     type Error = Error<CommE, PinE>;
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
-    type BootModeType = Ccs811<I2C, NWAKE, mode::Boot>;
+    type BootModeType = Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>;
 
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
         self.on_awaken(|s| s.dev.has_valid_app())

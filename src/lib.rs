@@ -57,18 +57,19 @@ pub use crate::types::{DeviceError, DeviceErrors, Error, ErrorAwake, ModeChangeE
 
 /// CCS811 device driver
 ///
-/// Wrapper arount AwakeCcs811 which handles the nWAKE pin
+/// Convenience wrapper arount AwakeCcs811 which handles waking up the device on each operation.
 #[derive(Debug)]
-pub struct Ccs811<I2C, NWAKE, MODE> {
+pub struct Ccs811<I2C, NWAKE, WAKEDELAY, MODE> {
     dev: Ccs811Awake<I2C, MODE>,
     n_wake_pin: NWAKE,
+    wake_delay: WAKEDELAY,
     _mode: PhantomData<MODE>,
 }
 
 /// Already awake CCS811 device driver
 ///
 /// This can be used when the nWAKE pin is connected directly to GND or when
-/// handling the nWAKE manually instead of using the `Ccs811` wrapper type.
+/// handling the device waking manually instead of using the `Ccs811` wrapper type.
 #[derive(Debug)]
 pub struct Ccs811Awake<I2C, MODE> {
     /// The concrete I²C device implementation.
@@ -99,6 +100,6 @@ mod private {
 
     impl Sealed for mode::Boot {}
     impl Sealed for mode::App {}
-    impl<I2C, NWAKE, MODE> Sealed for Ccs811<I2C, NWAKE, MODE> {}
+    impl<I2C, NWAKE, WAKEDELAY, MODE> Sealed for Ccs811<I2C, NWAKE, WAKEDELAY, MODE> {}
     impl<I2C, MODE> Sealed for Ccs811Awake<I2C, MODE> {}
 }

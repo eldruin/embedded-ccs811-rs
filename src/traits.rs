@@ -42,6 +42,8 @@ pub trait Ccs811BootMode: private::Sealed {
     type TargetType;
 
     /// Start application mode
+    ///
+    /// NOTE: after this call 1ms must be waited before sending application commands.
     fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError>;
 
     /// Verify application.

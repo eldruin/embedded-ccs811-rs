@@ -1,4 +1,4 @@
-use crate::hal::digital::v2::OutputPin;
+use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
     Error, ErrorAwake, ModeChangeError, Register,
@@ -80,14 +80,16 @@ where
     }
 }
 
-impl<I2C, CommE, PinE, NWAKE> Ccs811BootMode for Ccs811<I2C, NWAKE, mode::Boot>
+impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811BootMode
+    for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
 where
     I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
+    WAKEDELAY: DelayUs<u8>,
 {
     type Error = Error<CommE, PinE>;
     type ModeChangeError = ModeChangeError<Self::Error, Self>;
-    type TargetType = Ccs811<I2C, NWAKE, mode::App>;
+    type TargetType = Ccs811<I2C, NWAKE, WAKEDELAY, mode::App>;
 
     fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError> {
         self.wrap_mode_change(|s| s.start_application())

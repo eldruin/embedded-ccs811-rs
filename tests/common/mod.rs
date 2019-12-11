@@ -1,5 +1,6 @@
 use ccs811::{mode, Ccs811, SlaveAddr};
 use embedded_hal_mock::{
+    delay::MockNoop as NoDelay,
     i2c::{Mock as I2cMock, Transaction as I2cTrans},
     pin::Mock as PinMock,
 };
@@ -35,12 +36,20 @@ impl BitFlags {
     pub const HEATER_SUPPLY: u8 = 1 << 5;
 }
 
-pub fn new(transactions: &[I2cTrans], pin: PinMock) -> Ccs811<I2cMock, PinMock, mode::Boot> {
-    Ccs811::new(I2cMock::new(transactions), pin, SlaveAddr::default())
+pub fn new(
+    transactions: &[I2cTrans],
+    pin: PinMock,
+) -> Ccs811<I2cMock, PinMock, NoDelay, mode::Boot> {
+    Ccs811::new(
+        I2cMock::new(transactions),
+        SlaveAddr::default(),
+        pin,
+        NoDelay::new(),
+    )
 }
 
-pub fn destroy<MODE>(sensor: Ccs811<I2cMock, PinMock, MODE>) {
-    let (mut i2c, mut pin) = sensor.destroy();
+pub fn destroy<MODE>(sensor: Ccs811<I2cMock, PinMock, NoDelay, MODE>) {
+    let (mut i2c, mut pin, _delay) = sensor.destroy();
     i2c.done();
     pin.done();
 }
