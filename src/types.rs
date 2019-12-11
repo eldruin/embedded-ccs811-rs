@@ -132,6 +132,15 @@ pub enum MeasurementMode {
     ConstantPower250ms,
 }
 
+/// Firmware mode
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum FirmwareMode {
+    /// Boot mode. New firmware can be loaded.
+    Boot,
+    /// Application mode. CCS811 can take measurements
+    Application,
+}
+
 /// Possible slave addresses
 #[derive(Debug, Clone, Copy)]
 pub enum SlaveAddr {

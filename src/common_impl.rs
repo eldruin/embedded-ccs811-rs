@@ -1,7 +1,7 @@
 use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake,
-    ModeChangeError, Register, SlaveAddr,
+    FirmwareMode, ModeChangeError, Register, SlaveAddr,
 };
 use core::marker::PhantomData;
 use nb;
@@ -181,6 +181,16 @@ where
     type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
     type BootModeType = Ccs811Awake<I2C, mode::Boot>;
 
+    fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error> {
+        let status = self.read_status()?;
+        let mode = if (status & BitFlags::FW_MODE) != 0 {
+            FirmwareMode::Application
+        } else {
+            FirmwareMode::Boot
+        };
+        Ok(mode)
+    }
+
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
         let status = self.read_status()?;
         Ok((status & BitFlags::APP_VALID) != 0)
@@ -223,6 +233,10 @@ where
     type Error = Error<CommE, PinE>;
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
     type BootModeType = Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>;
+
+    fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error> {
+        self.on_awaken(|s| s.dev.firmware_mode())
+    }
 
     fn has_valid_app(&mut self) -> Result<bool, Self::Error> {
         self.on_awaken(|s| s.dev.has_valid_app())

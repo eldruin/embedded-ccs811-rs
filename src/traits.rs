@@ -1,4 +1,4 @@
-use crate::{private, MeasurementMode};
+use crate::{private, FirmwareMode, MeasurementMode};
 use nb;
 
 /// General CCS811 methods
@@ -9,6 +9,9 @@ pub trait Ccs811Device: private::Sealed {
     type ModeChangeError;
     /// Boot mode type
     type BootModeType;
+
+    /// Get the firmware mode.
+    fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error>;
 
     /// Check if a valid application firmware is loaded.
     fn has_valid_app(&mut self) -> Result<bool, Self::Error>;

@@ -20,6 +20,7 @@ impl BitFlags {
     pub const APP_VALID: u8 = 1 << 4;
     pub const APP_VERIFY: u8 = 1 << 5;
     pub const APP_ERASE: u8 = 1 << 6;
+    pub const FW_MODE: u8 = 1 << 7;
     pub const ERROR: u8 = 1;
     pub const WRITE_REG_INVALID: u8 = 1;
     pub const READ_REG_INVALID: u8 = 1 << 1;

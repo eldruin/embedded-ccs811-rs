@@ -1,4 +1,4 @@
-use ccs811::prelude::*;
+use ccs811::{prelude::*, FirmwareMode as FwMode};
 use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
@@ -73,6 +73,8 @@ macro_rules! read_status_test {
 
 read_status_test!(can_get_invalid_app, has_valid_app, false, 0);
 read_status_test!(can_get_valid_app, has_valid_app, true, BF::APP_VALID);
+read_status_test!(fw_mode_boot, firmware_mode, FwMode::Boot, 0);
+read_status_test!(fw_mode_app, firmware_mode, FwMode::Application, BF::FW_MODE);
 
 #[test]
 fn can_do_software_reset() {
