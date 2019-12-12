@@ -62,6 +62,16 @@ pub trait Ccs811AppMode: private::Sealed {
     /// The current is a value between 0uA and 63uA.
     /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error>;
+
+    /// Set the environment temperature and relative humidity.
+    ///
+    /// The humidity must be provided as percentage: [0.0..100.0].
+    /// The temperature must be provided in Celsius. (Theoretical max: 254.998046875ºC)
+    fn set_environment(
+        &mut self,
+        humidity_percentage: f32,
+        temperature_celsius: f32,
+    ) -> Result<(), Self::Error>;
 }
 
 /// Methods available when on boot mode

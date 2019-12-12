@@ -52,6 +52,52 @@ where
             raw_voltage: raw.1,
         })
     }
+
+    fn set_environment(
+        &mut self,
+        humidity_percentage: f32,
+        temperature_celsius: f32,
+    ) -> Result<(), Self::Error> {
+        if humidity_percentage < 0.0
+            || humidity_percentage > 100.0
+            || temperature_celsius > 254.998046875
+        {
+            return Err(ErrorAwake::InvalidInputData);
+        }
+        let raw_humidity = get_raw_humidity(humidity_percentage);
+        let raw_temp = get_raw_temperature(temperature_celsius);
+        let raw = [
+            Register::ENV_DATA,
+            raw_humidity.0,
+            raw_humidity.1,
+            raw_temp.0,
+            raw_temp.1,
+        ];
+        self.i2c
+            .write(self.address, &raw)
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
+}
+
+fn get_raw_humidity(humidity_percentage: f32) -> (u8, u8) {
+    get_raw_environment_data(humidity_percentage)
+}
+
+fn get_raw_temperature(temperature_celsius: f32) -> (u8, u8) {
+    let value = temperature_celsius + 25.0;
+    if value < 0.0 {
+        (0, 0)
+    } else {
+        get_raw_environment_data(value)
+    }
+}
+
+fn get_raw_environment_data(value: f32) -> (u8, u8) {
+    let main = (value as u8) << 1;
+    let rest = value - f32::from(value as u8);
+    let rest = (rest * 512.0) as u16;
+    (main | (((rest & (1 << 8)) >> 8) as u8), rest as u8)
 }
 
 fn handle_raw_data(data0: u8, data1: u8) -> (u8, u16) {
@@ -83,5 +129,45 @@ where
 
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error> {
         self.on_awaken_nb(|s| s.dev.data())
+    }
+
+    fn set_environment(
+        &mut self,
+        humidity_percentage: f32,
+        temperature_celsius: f32,
+    ) -> Result<(), Self::Error> {
+        self.on_awaken(|s| {
+            s.dev
+                .set_environment(humidity_percentage, temperature_celsius)
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn convert_humidity() {
+        assert_eq!((0, 0), get_raw_humidity(0.0));
+        assert_eq!((0x64, 0), get_raw_humidity(50.0));
+        assert_eq!((0x61, 0), get_raw_humidity(48.5));
+        assert_eq!((0x60, 0x80), get_raw_humidity(48.25));
+        assert_eq!((0x60, 0x40), get_raw_humidity(48.125));
+        assert_eq!((0x60, 0x20), get_raw_humidity(48.0625));
+        assert_eq!((0x60, 0x10), get_raw_humidity(48.03125));
+        assert_eq!((0x60, 0x08), get_raw_humidity(48.015625));
+        assert_eq!((0x60, 0x04), get_raw_humidity(48.0078125));
+        assert_eq!((0x60, 0x02), get_raw_humidity(48.00390625));
+        assert_eq!((0x60, 0x01), get_raw_humidity(48.001953125));
+        assert_eq!((0x61, 0xFF), get_raw_humidity(48.998046875));
+    }
+
+    #[test]
+    fn convert_temperature() {
+        assert_eq!((0, 0), get_raw_temperature(-25.5));
+        assert_eq!((0, 0), get_raw_temperature(-25.0));
+        assert_eq!((0x64, 0), get_raw_temperature(25.0));
+        assert_eq!((0x61, 0), get_raw_temperature(23.5));
     }
 }

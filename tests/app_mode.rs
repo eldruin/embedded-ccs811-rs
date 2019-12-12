@@ -1,10 +1,11 @@
-use ccs811::{prelude::*, AlgorithmResult, MeasurementMode};
+use ccs811::{prelude::*, AlgorithmResult, Error, MeasurementMode};
 use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
 mod common;
 use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
+use nb::Error as NbError;
 
 macro_rules! set_mode_test {
     ($name:ident, $mode:ident, $value:expr) => {
@@ -71,7 +72,36 @@ fn can_read_alg_result_data() {
         raw_current: 0x50 >> 2,
         raw_voltage: 0x291,
     };
-    sensor.data().expect_err("Should be nb::Error::WouldBlock");
+    assert_error!(sensor.data(), NbError::WouldBlock);
     assert_eq!(expected, sensor.data().unwrap());
+    destroy(sensor);
+}
+
+macro_rules! invalid_env_test {
+    ($name:ident, $rh:expr, $temp:expr) => {
+        #[test]
+        fn $name() {
+            let nwake =
+                PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+            let mut sensor = new(&[], nwake);
+            assert_error!(sensor.set_environment($rh, $temp), Error::InvalidInputData);
+            destroy(sensor);
+        }
+    };
+}
+
+invalid_env_test!(cannot_set_negative_humidity, -1.0, 0.0);
+invalid_env_test!(cannot_set_too_high_humidity, 100.1, 0.0);
+invalid_env_test!(cannot_set_too_high_temp, 0.0, 255.0);
+
+#[test]
+fn can_set_environment_params() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write(DEV_ADDR, vec![Register::ENV_DATA, 0x60, 0x80, 0x64, 0x40]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor.set_environment(48.25, 25.125).unwrap();
     destroy(sensor);
 }

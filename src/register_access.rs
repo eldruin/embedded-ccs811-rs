@@ -6,6 +6,7 @@ impl Register {
     pub const MEAS_MODE: u8 = 0x01;
     pub const ALG_RESULT_DATA: u8 = 0x02;
     pub const RAW_DATA: u8 = 0x03;
+    pub const ENV_DATA: u8 = 0x05;
     pub const HW_ID: u8 = 0x20;
     pub const HW_VERSION: u8 = 0x21;
     pub const FW_BOOT_VERSION: u8 = 0x23;

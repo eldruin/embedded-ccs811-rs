@@ -15,6 +15,8 @@ pub enum Error<CommE, PinE> {
     Device(DeviceErrors),
     /// No valid application loaded
     NoValidApp,
+    /// Invalid input data provided to function
+    InvalidInputData,
 }
 
 /// All possible errors when using an the `Ccs811Awake` type.
@@ -28,9 +30,10 @@ pub enum ErrorAwake<E> {
     /// You can index this list by `DeviceError` to see if an specific error variant
     /// has been reported. See the documentation for usage examples.
     Device(DeviceErrors),
-
     /// No valid application loaded
     NoValidApp,
+    /// Invalid input data provided to function
+    InvalidInputData,
 }
 
 impl<CommE, PinE> From<ErrorAwake<CommE>> for Error<CommE, PinE> {
@@ -39,6 +42,7 @@ impl<CommE, PinE> From<ErrorAwake<CommE>> for Error<CommE, PinE> {
             ErrorAwake::I2C(e) => Error::I2C(e),
             ErrorAwake::Device(e) => Error::Device(e),
             ErrorAwake::NoValidApp => Error::NoValidApp,
+            ErrorAwake::InvalidInputData => Error::InvalidInputData,
         }
     }
 }
