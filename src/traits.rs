@@ -72,6 +72,16 @@ pub trait Ccs811AppMode: private::Sealed {
         humidity_percentage: f32,
         temperature_celsius: f32,
     ) -> Result<(), Self::Error>;
+
+    /// Set the eCO2 threshold values for interrupt generation (in ppm).
+    /// 
+    /// An interrupt will be asserted if the value moved from the current
+    /// range by 50 ppm.
+    fn set_eco2_thresholds(
+        &mut self,
+        low_to_medium: u16,
+        medium_to_high: u16,
+    ) -> Result<(), Self::Error>;
 }
 
 /// Methods available when on boot mode

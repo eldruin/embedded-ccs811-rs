@@ -78,6 +78,26 @@ where
             .map_err(ErrorAwake::I2C)?;
         self.check_status_error()
     }
+
+    fn set_eco2_thresholds(
+        &mut self,
+        low_to_medium: u16,
+        medium_to_high: u16,
+    ) -> Result<(), Self::Error> {
+        self.i2c
+            .write(
+                self.address,
+                &[
+                    Register::THRESHOLDS,
+                    (low_to_medium >> 8) as u8,
+                    low_to_medium as u8,
+                    (medium_to_high >> 8) as u8,
+                    medium_to_high as u8,
+                ],
+            )
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
 }
 
 fn get_raw_humidity(humidity_percentage: f32) -> (u8, u8) {
@@ -140,6 +160,14 @@ where
             s.dev
                 .set_environment(humidity_percentage, temperature_celsius)
         })
+    }
+
+    fn set_eco2_thresholds(
+        &mut self,
+        low_to_medium: u16,
+        medium_to_high: u16,
+    ) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.set_eco2_thresholds(low_to_medium, medium_to_high))
     }
 }
 

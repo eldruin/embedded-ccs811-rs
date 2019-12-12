@@ -105,3 +105,15 @@ fn can_set_environment_params() {
     sensor.set_environment(48.25, 25.125).unwrap();
     destroy(sensor);
 }
+
+#[test]
+fn can_set_thresholds() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write(DEV_ADDR, vec![Register::THRESHOLDS, 0x05, 0xDC, 0x09, 0xC4]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor.set_eco2_thresholds(1500, 2500).unwrap();
+    destroy(sensor);
+}
