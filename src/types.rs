@@ -145,6 +145,18 @@ pub enum FirmwareMode {
     Application,
 }
 
+/// Interrupt generation modes.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum InterruptMode {
+    /// Disable interrupt generation
+    Disabled,
+    /// Generate an interrupt every time there is new data ready.
+    OnDataReady,
+    /// Generate an interrupt if the measurement crosses a threshold by more
+    /// than 50 ppm. (See `set_eco2_thresholds()`).
+    OnThresholdCrossed,
+}
+
 /// Algorithm result
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AlgorithmResult {

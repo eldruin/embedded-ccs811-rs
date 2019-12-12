@@ -1,4 +1,4 @@
-use crate::{private, AlgorithmResult, FirmwareMode, MeasurementMode};
+use crate::{private, AlgorithmResult, FirmwareMode, InterruptMode, MeasurementMode};
 use nb;
 
 /// General CCS811 methods
@@ -74,7 +74,7 @@ pub trait Ccs811AppMode: private::Sealed {
     ) -> Result<(), Self::Error>;
 
     /// Set the eCO2 threshold values for interrupt generation (in ppm).
-    /// 
+    ///
     /// An interrupt will be asserted if the value moved from the current
     /// range by 50 ppm.
     fn set_eco2_thresholds(
@@ -82,6 +82,9 @@ pub trait Ccs811AppMode: private::Sealed {
         low_to_medium: u16,
         medium_to_high: u16,
     ) -> Result<(), Self::Error>;
+
+    /// Configure the interrupt generation.
+    fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error>;
 }
 
 /// Methods available when on boot mode

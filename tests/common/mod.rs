@@ -41,6 +41,8 @@ impl BitFlags {
     pub const MAX_RESISTANCE: u8 = 1 << 3;
     pub const HEATER_FAULT: u8 = 1 << 4;
     pub const HEATER_SUPPLY: u8 = 1 << 5;
+    pub const INTERRUPT: u8 = 1 << 3;
+    pub const THRESH: u8 = 1 << 2;
 }
 
 pub fn new(

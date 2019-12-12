@@ -1,7 +1,7 @@
 use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
     hal, mode, register_access::get_errors, AlgorithmResult, BitFlags, Ccs811, Ccs811AppMode,
-    Ccs811Awake, Error, ErrorAwake, MeasurementMode, Register,
+    Ccs811Awake, Error, ErrorAwake, InterruptMode, MeasurementMode, Register,
 };
 
 impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::Boot>
@@ -98,6 +98,18 @@ where
             .map_err(ErrorAwake::I2C)?;
         self.check_status_error()
     }
+
+    fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error> {
+        let int_mask = match mode {
+            InterruptMode::Disabled => 0,
+            InterruptMode::OnDataReady => BitFlags::INTERRUPT,
+            InterruptMode::OnThresholdCrossed => BitFlags::INTERRUPT | BitFlags::THRESH,
+        };
+        let meas_mode = (self.meas_mode_reg & (0b111 << 4)) | int_mask;
+        self.write_register_1byte(Register::MEAS_MODE, meas_mode)?;
+        self.meas_mode_reg = meas_mode;
+        Ok(())
+    }
 }
 
 fn get_raw_humidity(humidity_percentage: f32) -> (u8, u8) {
@@ -168,6 +180,10 @@ where
         medium_to_high: u16,
     ) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.set_eco2_thresholds(low_to_medium, medium_to_high))
+    }
+
+    fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.set_interrupt_mode(mode))
     }
 }
 

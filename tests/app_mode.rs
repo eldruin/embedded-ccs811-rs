@@ -1,4 +1,4 @@
-use ccs811::{prelude::*, AlgorithmResult, Error, MeasurementMode};
+use ccs811::{prelude::*, AlgorithmResult, Error, InterruptMode, MeasurementMode};
 use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
@@ -7,20 +7,26 @@ mod common;
 use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
 use nb::Error as NbError;
 
-macro_rules! set_mode_test {
-    ($name:ident, $mode:ident, $value:expr) => {
+macro_rules! set_test {
+    ($name:ident, $method:ident, $value:expr, $reg:ident, $reg_value:expr) => {
         #[test]
         fn $name() {
             let nwake =
                 PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
             let transactions = [
-                I2cTrans::write(DEV_ADDR, vec![Register::MEAS_MODE, $value]),
+                I2cTrans::write(DEV_ADDR, vec![Register::$reg, $reg_value]),
                 I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
             ];
             let mut sensor = new(&transactions, nwake);
-            sensor.set_mode(MeasurementMode::$mode).unwrap();
+            sensor.$method($value).unwrap();
             destroy(sensor);
         }
+    };
+}
+
+macro_rules! set_mode_test {
+    ($name:ident, $mode:ident, $value:expr) => {
+        set_test!($name, set_mode, MeasurementMode::$mode, MEAS_MODE, $value);
     };
 }
 
@@ -117,3 +123,19 @@ fn can_set_thresholds() {
     sensor.set_eco2_thresholds(1500, 2500).unwrap();
     destroy(sensor);
 }
+
+macro_rules! set_int_test {
+    ($name:ident, $mode:ident, $value:expr) => {
+        set_test!(
+            $name,
+            set_interrupt_mode,
+            InterruptMode::$mode,
+            MEAS_MODE,
+            $value
+        );
+    };
+}
+
+set_int_test!(disable_int, Disabled, 0);
+set_int_test!(enable_int_data, OnDataReady, BF::INTERRUPT);
+set_int_test!(en_int_th, OnThresholdCrossed, BF::INTERRUPT | BF::THRESH);
