@@ -126,4 +126,14 @@ pub trait Ccs811BootMode: private::Sealed {
         delay: &mut D,
     ) -> Result<(), Self::Error>;
 
+    /// Reset, erase, download new application and verify it in one step.
+    ///
+    /// This resets the device via a software reset, erases the current application,
+    /// flashes the new binary and verifies it. This takes at least 572ms + 50ms * (bin_size/8).
+    /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
+    fn update_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error>;
 }

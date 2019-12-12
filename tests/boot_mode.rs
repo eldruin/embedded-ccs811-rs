@@ -125,3 +125,37 @@ fn can_download_app() {
         .unwrap();
     destroy(sensor);
 }
+
+#[test]
+fn can_update_app() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_ERASE, 0xE7, 0xA7, 0xE6, 0x09]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_ERASE]),
+        I2cTrans::write(
+            DEV_ADDR,
+            vec![Register::REG_BOOT_APP, 0, 1, 2, 3, 4, 5, 6, 7],
+        ),
+        I2cTrans::write(
+            DEV_ADDR,
+            vec![Register::REG_BOOT_APP, 8, 9, 10, 11, 12, 13, 14, 15],
+        ),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_VERIFY]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_VERIFY]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor
+        .update_application(
+            &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            &mut NoDelay::new(),
+        )
+        .unwrap();
+    destroy(sensor);
+}

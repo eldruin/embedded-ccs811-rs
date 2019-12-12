@@ -101,6 +101,41 @@ where
         }
         self.check_status_error()
     }
+
+    fn update_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error> {
+        self.write_sw_reset()?;
+        delay.delay_ms(2);
+        match self.erase_application() {
+            Err(nb::Error::WouldBlock) => delay.delay_ms(500),
+            Err(nb::Error::Other(e)) => return Err(e),
+            Ok(_) => (),
+        }
+        loop {
+            match self.erase_application() {
+                Err(nb::Error::WouldBlock) => (),
+                Err(nb::Error::Other(e)) => return Err(e),
+                Ok(_) => break,
+            }
+        }
+        self.download_application(bin, delay)?;
+        match self.verify_application() {
+            Err(nb::Error::WouldBlock) => delay.delay_ms(70),
+            Err(nb::Error::Other(e)) => return Err(e),
+            Ok(_) => (),
+        }
+        loop {
+            match self.verify_application() {
+                Err(nb::Error::WouldBlock) => (),
+                Err(nb::Error::Other(e)) => return Err(e),
+                Ok(_) => break,
+            }
+        }
+        Ok(())
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811BootMode
@@ -132,5 +167,13 @@ where
         delay: &mut D,
     ) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.download_application(bin, delay))
+    }
+
+    fn update_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.update_application(bin, delay))
     }
 }
