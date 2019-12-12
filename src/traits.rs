@@ -66,6 +66,9 @@ pub trait Ccs811AppMode: private::Sealed {
     /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error>;
 
+    /// Get the current baseline
+    fn baseline(&mut self) -> Result<[u8; 2], Self::Error>;
+
     /// Set the environment temperature and relative humidity.
     ///
     /// The humidity must be provided as percentage: [0.0..100.0].

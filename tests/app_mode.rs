@@ -83,6 +83,19 @@ fn can_read_alg_result_data() {
     destroy(sensor);
 }
 
+#[test]
+fn can_read_baseline() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write_read(DEV_ADDR, vec![Register::BASELINE], vec![0x34, 0x52]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    let data = sensor.baseline().unwrap();
+    assert_eq!([0x34, 0x52], data);
+    destroy(sensor);
+}
+
 macro_rules! invalid_env_test {
     ($name:ident, $rh:expr, $temp:expr) => {
         #[test]

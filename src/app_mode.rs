@@ -79,6 +79,10 @@ where
         self.check_status_error()
     }
 
+    fn baseline(&mut self) -> Result<[u8; 2], Self::Error> {
+        self.read_register_2bytes(Register::BASELINE)
+    }
+
     fn set_eco2_thresholds(
         &mut self,
         low_to_medium: u16,
@@ -161,6 +165,10 @@ where
 
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error> {
         self.on_awaken_nb(|s| s.dev.data())
+    }
+
+    fn baseline(&mut self) -> Result<[u8; 2], Self::Error> {
+        self.on_awaken(|s| s.dev.baseline())
     }
 
     fn set_environment(
