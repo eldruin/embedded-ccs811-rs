@@ -60,7 +60,7 @@ where
     ) -> Result<(), Self::Error> {
         if humidity_percentage < 0.0
             || humidity_percentage > 100.0
-            || temperature_celsius > 254.998046875
+            || temperature_celsius > 254.998_05
         {
             return Err(ErrorAwake::InvalidInputData);
         }
@@ -184,11 +184,11 @@ mod tests {
         assert_eq!((0x60, 0x40), get_raw_humidity(48.125));
         assert_eq!((0x60, 0x20), get_raw_humidity(48.0625));
         assert_eq!((0x60, 0x10), get_raw_humidity(48.03125));
-        assert_eq!((0x60, 0x08), get_raw_humidity(48.015625));
-        assert_eq!((0x60, 0x04), get_raw_humidity(48.0078125));
-        assert_eq!((0x60, 0x02), get_raw_humidity(48.00390625));
-        assert_eq!((0x60, 0x01), get_raw_humidity(48.001953125));
-        assert_eq!((0x61, 0xFF), get_raw_humidity(48.998046875));
+        assert_eq!((0x60, 0x08), get_raw_humidity(48.015_625));
+        assert_eq!((0x60, 0x04), get_raw_humidity(48.007_813));
+        assert_eq!((0x60, 0x02), get_raw_humidity(48.003_906));
+        assert_eq!((0x60, 0x01), get_raw_humidity(48.001_953));
+        assert_eq!((0x61, 0xFF), get_raw_humidity(48.998_047));
     }
 
     #[test]

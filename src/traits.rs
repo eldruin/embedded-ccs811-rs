@@ -66,7 +66,7 @@ pub trait Ccs811AppMode: private::Sealed {
     /// Set the environment temperature and relative humidity.
     ///
     /// The humidity must be provided as percentage: [0.0..100.0].
-    /// The temperature must be provided in Celsius. (Theoretical max: 254.998046875ºC)
+    /// The temperature must be provided in Celsius. (Theoretical max: 254.99805ºC)
     fn set_environment(
         &mut self,
         humidity_percentage: f32,
