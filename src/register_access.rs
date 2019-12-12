@@ -17,6 +17,7 @@ impl Register {
 
 pub(crate) struct BitFlags {}
 impl BitFlags {
+    pub const DATA_READY: u8 = 1 << 3;
     pub const APP_VALID: u8 = 1 << 4;
     pub const APP_VERIFY: u8 = 1 << 5;
     pub const APP_ERASE: u8 = 1 << 6;

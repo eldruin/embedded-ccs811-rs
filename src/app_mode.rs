@@ -1,6 +1,7 @@
 use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
-    hal, mode, Ccs811, Ccs811AppMode, Ccs811Awake, Error, ErrorAwake, MeasurementMode, Register,
+    hal, mode, BitFlags, Ccs811, Ccs811AppMode, Ccs811Awake, Error, ErrorAwake, MeasurementMode,
+    Register,
 };
 
 impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::Boot>
@@ -21,6 +22,11 @@ where
         self.meas_mode_reg = meas_mode;
         Ok(())
     }
+
+    fn has_data_ready(&mut self) -> Result<bool, Self::Error> {
+        let status = self.read_status()?;
+        Ok((status & BitFlags::DATA_READY) != 0)
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
@@ -33,5 +39,9 @@ where
 
     fn set_mode(&mut self, mode: MeasurementMode) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.set_mode(mode))
+    }
+
+    fn has_data_ready(&mut self) -> Result<bool, Self::Error> {
+        self.on_awaken(|s| s.dev.has_data_ready())
     }
 }

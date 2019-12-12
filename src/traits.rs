@@ -43,6 +43,9 @@ pub trait Ccs811AppMode: private::Sealed {
     /// place the device in `Idle` mode for at least 10 minutes before
     /// enabling the new mode.
     fn set_mode(&mut self, mode: MeasurementMode) -> Result<(), Self::Error>;
+
+    /// Check if there is a new data sample ready.
+    fn has_data_ready(&mut self) -> Result<bool, Self::Error>;
 }
 
 /// Methods available when on boot mode

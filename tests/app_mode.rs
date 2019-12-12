@@ -4,7 +4,7 @@ use embedded_hal_mock::{
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
 mod common;
-use crate::common::{destroy, new, Register, DEV_ADDR};
+use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
 
 macro_rules! set_mode_test {
     ($name:ident, $mode:ident, $value:expr) => {
@@ -28,3 +28,6 @@ set_mode_test!(can_set_mode_1, ConstantPower1s, 1 << 4);
 set_mode_test!(can_set_mode_2, PulseHeating10s, 2 << 4);
 set_mode_test!(can_set_mode_3, LowPowerPulseHeating60s, 3 << 4);
 set_mode_test!(can_set_mode_4, ConstantPower250ms, 4 << 4);
+
+read_status_test!(has_data_ready, has_data_ready, true, BF::DATA_READY);
+read_status_test!(has_no_data_ready, has_data_ready, false, 0);
