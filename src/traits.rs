@@ -119,6 +119,7 @@ pub trait Ccs811BootMode: private::Sealed {
     /// Download new application.
     ///
     /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
+    /// This takes at least 50ms * (bin_size/8).
     fn download_application<D: DelayMs<u16>>(
         &mut self,
         bin: &[u8],
