@@ -11,6 +11,7 @@ pub struct Register {}
 impl Register {
     pub const STATUS: u8 = 0x00;
     pub const MEAS_MODE: u8 = 0x01;
+    pub const RAW_DATA: u8 = 0x03;
     pub const HW_ID: u8 = 0x20;
     pub const HW_VERSION: u8 = 0x21;
     pub const FW_BOOT_VERSION: u8 = 0x23;

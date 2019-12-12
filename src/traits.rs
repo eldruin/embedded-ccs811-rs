@@ -46,6 +46,14 @@ pub trait Ccs811AppMode: private::Sealed {
 
     /// Check if there is a new data sample ready.
     fn has_data_ready(&mut self) -> Result<bool, Self::Error>;
+
+    /// Get the raw sensor data.
+    ///
+    /// Returns a tuple containing the current and voltage through the sensor in
+    /// the format: (current, voltage).
+    /// The current is a value between 0uA and 63uA.
+    /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
+    fn raw_data(&mut self) -> Result<(u8, u16), Self::Error>;
 }
 
 /// Methods available when on boot mode

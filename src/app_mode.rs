@@ -27,6 +27,14 @@ where
         let status = self.read_status()?;
         Ok((status & BitFlags::DATA_READY) != 0)
     }
+
+    fn raw_data(&mut self) -> Result<(u8, u16), Self::Error> {
+        let data = self.read_register_2bytes(Register::RAW_DATA)?;
+        Ok((
+            (data[1] >> 2) as u8,
+            u16::from(data[0]) | (u16::from(data[1] & 0x3) << 8),
+        ))
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
@@ -43,5 +51,9 @@ where
 
     fn has_data_ready(&mut self) -> Result<bool, Self::Error> {
         self.on_awaken(|s| s.dev.has_data_ready())
+    }
+
+    fn raw_data(&mut self) -> Result<(u8, u16), Self::Error> {
+        self.on_awaken(|s| s.dev.raw_data())
     }
 }
