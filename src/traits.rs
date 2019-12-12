@@ -30,6 +30,8 @@ pub trait Ccs811Device: private::Sealed {
     fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
 
     /// Restart the device in boot mode.
+    ///
+    /// 2ms should be waited before doing any other operation.
     fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError>;
 }
 
