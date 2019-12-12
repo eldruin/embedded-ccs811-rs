@@ -141,6 +141,19 @@ pub enum FirmwareMode {
     Application,
 }
 
+/// Algorithm result
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AlgorithmResult {
+    /// eCO2 result in ppm
+    pub eco2: u16,
+    /// eTVOC result in ppb
+    pub etvoc: u16,
+    /// Raw sensor current in uA
+    pub raw_current: u8,
+    /// Raw sensor voltage (1023 = 1.65V)
+    pub raw_voltage: u16,
+}
+
 /// Possible slave addresses
 #[derive(Debug, Clone, Copy)]
 pub enum SlaveAddr {

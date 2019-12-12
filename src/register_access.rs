@@ -4,6 +4,7 @@ pub(crate) struct Register {}
 impl Register {
     pub const STATUS: u8 = 0x00;
     pub const MEAS_MODE: u8 = 0x01;
+    pub const ALG_RESULT_DATA: u8 = 0x02;
     pub const RAW_DATA: u8 = 0x03;
     pub const HW_ID: u8 = 0x20;
     pub const HW_VERSION: u8 = 0x21;
@@ -95,7 +96,7 @@ where
     }
 }
 
-fn get_errors(error_id: u8) -> Result<(), DeviceErrors> {
+pub(crate) fn get_errors(error_id: u8) -> Result<(), DeviceErrors> {
     let mut has_error = false;
     let mut errors = DeviceErrors([false; 6]);
     if (error_id & BitFlags::WRITE_REG_INVALID) != 0 {

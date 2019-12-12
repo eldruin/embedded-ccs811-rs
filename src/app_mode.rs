@@ -1,7 +1,7 @@
 use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
-    hal, mode, BitFlags, Ccs811, Ccs811AppMode, Ccs811Awake, Error, ErrorAwake, MeasurementMode,
-    Register,
+    hal, mode, register_access::get_errors, AlgorithmResult, BitFlags, Ccs811, Ccs811AppMode,
+    Ccs811Awake, Error, ErrorAwake, MeasurementMode, Register,
 };
 
 impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::Boot>
@@ -35,6 +35,25 @@ where
             u16::from(data[0]) | (u16::from(data[1] & 0x3) << 8),
         ))
     }
+
+    fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error> {
+        let mut data = [0; 8];
+        self.i2c
+            .write_read(self.address, &[Register::ALG_RESULT_DATA], &mut data)
+            .map_err(ErrorAwake::I2C)?;
+        let status = data[4];
+        if (status & BitFlags::ERROR) != 0 {
+            get_errors(data[5]).map_err(ErrorAwake::Device)?;
+        } else if (status & BitFlags::DATA_READY) == 0 {
+            return Err(nb::Error::WouldBlock);
+        }
+        Ok(AlgorithmResult {
+            eco2: (u16::from(data[0]) << 8) | u16::from(data[1]),
+            etvoc: (u16::from(data[2]) << 8) | u16::from(data[3]),
+            raw_current: (data[7] >> 2) as u8,
+            raw_voltage: u16::from(data[6]) | (u16::from(data[7] & 0x3) << 8),
+        })
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
@@ -55,5 +74,9 @@ where
 
     fn raw_data(&mut self) -> Result<(u8, u16), Self::Error> {
         self.on_awaken(|s| s.dev.raw_data())
+    }
+
+    fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error> {
+        self.on_awaken_nb(|s| s.dev.data())
     }
 }

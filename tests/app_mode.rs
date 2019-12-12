@@ -1,4 +1,4 @@
-use ccs811::{prelude::*, MeasurementMode};
+use ccs811::{prelude::*, AlgorithmResult, MeasurementMode};
 use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
@@ -41,5 +41,37 @@ fn can_read_raw_data() {
     ];
     let mut sensor = new(&transactions, nwake);
     assert_eq!((0x50 >> 2, 0x234), sensor.raw_data().unwrap());
+    destroy(sensor);
+}
+
+#[test]
+fn can_read_alg_result_data() {
+    let nwake = PinMock::new(&[
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+    ]);
+    let transactions = [
+        I2cTrans::write_read(
+            DEV_ADDR,
+            vec![Register::ALG_RESULT_DATA],
+            vec![0, 0, 0, 0, 0, 0, 0, 0],
+        ),
+        I2cTrans::write_read(
+            DEV_ADDR,
+            vec![Register::ALG_RESULT_DATA],
+            vec![0x12, 0x34, 0x56, 0x78, BF::DATA_READY, 0, 0x91, 0x52],
+        ),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    let expected = AlgorithmResult {
+        eco2: 0x1234,
+        etvoc: 0x5678,
+        raw_current: 0x50 >> 2,
+        raw_voltage: 0x291,
+    };
+    sensor.data().expect_err("Should be nb::Error::WouldBlock");
+    assert_eq!(expected, sensor.data().unwrap());
     destroy(sensor);
 }

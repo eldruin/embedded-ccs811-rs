@@ -1,4 +1,4 @@
-use crate::{private, FirmwareMode, MeasurementMode};
+use crate::{private, AlgorithmResult, FirmwareMode, MeasurementMode};
 use nb;
 
 /// General CCS811 methods
@@ -54,6 +54,14 @@ pub trait Ccs811AppMode: private::Sealed {
     /// The current is a value between 0uA and 63uA.
     /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
     fn raw_data(&mut self) -> Result<(u8, u16), Self::Error>;
+
+    /// Get the algorithm results data.
+    ///
+    /// Returns a tuple containing the current and voltage through the sensor in
+    /// the format: (current, voltage).
+    /// The current is a value between 0uA and 63uA.
+    /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
+    fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error>;
 }
 
 /// Methods available when on boot mode
