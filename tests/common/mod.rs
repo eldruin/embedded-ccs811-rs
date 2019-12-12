@@ -55,3 +55,22 @@ pub fn destroy<MODE>(sensor: Ccs811<I2cMock, PinMock, NoDelay, MODE>) {
     i2c.done();
     pin.done();
 }
+
+#[macro_export]
+macro_rules! read_status_test {
+    ($name:ident, $method:ident, $expected:expr, $value: expr) => {
+        #[test]
+        fn $name() {
+            let nwake =
+                PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+            let transactions = [I2cTrans::write_read(
+                DEV_ADDR,
+                vec![Register::STATUS],
+                vec![$value],
+            )];
+            let mut sensor = new(&transactions, nwake);
+            assert_eq!($expected, sensor.$method().unwrap());
+            destroy(sensor);
+        }
+    };
+}

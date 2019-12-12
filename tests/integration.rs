@@ -53,24 +53,6 @@ get_test!(
     (1, 2, 0x34)
 );
 
-macro_rules! read_status_test {
-    ($name:ident, $method:ident, $expected:expr, $value: expr) => {
-        #[test]
-        fn $name() {
-            let nwake =
-                PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
-            let transactions = [I2cTrans::write_read(
-                DEV_ADDR,
-                vec![Register::STATUS],
-                vec![$value],
-            )];
-            let mut sensor = new(&transactions, nwake);
-            assert_eq!($expected, sensor.$method().unwrap());
-            destroy(sensor);
-        }
-    };
-}
-
 read_status_test!(can_get_invalid_app, has_valid_app, false, 0);
 read_status_test!(can_get_valid_app, has_valid_app, true, BF::APP_VALID);
 read_status_test!(fw_mode_boot, firmware_mode, FwMode::Boot, 0);
