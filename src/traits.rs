@@ -1,4 +1,5 @@
 use crate::{private, AlgorithmResult, FirmwareMode, InterruptMode, MeasurementMode};
+use embedded_hal::blocking::delay::DelayMs;
 use nb;
 
 /// General CCS811 methods
@@ -112,4 +113,14 @@ pub trait Ccs811BootMode: private::Sealed {
     /// NOTE: After the first call, 500ms must be waited before calling again to
     /// poll until completion.
     fn erase_application(&mut self) -> nb::Result<(), Self::Error>;
+
+    /// Download new application.
+    ///
+    /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
+    fn download_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error>;
+
 }

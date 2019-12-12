@@ -1,4 +1,7 @@
-use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
+use crate::hal::{
+    blocking::delay::{DelayMs, DelayUs},
+    digital::v2::OutputPin,
+};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
     Error, ErrorAwake, ModeChangeError, Register,
@@ -78,6 +81,26 @@ where
             Ok(())
         }
     }
+
+    fn download_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error> {
+        if bin.len() % 8 != 0 {
+            return Err(ErrorAwake::InvalidInputData);
+        }
+        let mut data = [0; 9];
+        data[0] = Register::REG_BOOT_APP;
+        for chunk in bin.chunks(8) {
+            data[1..].copy_from_slice(chunk);
+            self.i2c
+                .write(self.address, &data)
+                .map_err(ErrorAwake::I2C)?;
+            delay.delay_ms(50);
+        }
+        self.check_status_error()
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811BootMode
@@ -101,5 +124,13 @@ where
 
     fn erase_application(&mut self) -> nb::Result<(), Self::Error> {
         self.on_awaken_nb(|s| s.dev.erase_application())
+    }
+
+    fn download_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.download_application(bin, delay))
     }
 }

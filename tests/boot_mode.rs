@@ -1,5 +1,6 @@
 use ccs811::{prelude::*, Error};
 use embedded_hal_mock::{
+    delay::MockNoop as NoDelay,
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
@@ -87,5 +88,40 @@ fn can_erase_app() {
         .erase_application()
         .expect_err("Should have returned nb::Error::WouldBlock");
     sensor.erase_application().unwrap();
+    destroy(sensor);
+}
+
+#[test]
+fn cannot_download_wrong_size_app() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let mut sensor = new(&[], nwake);
+    assert_error!(
+        sensor.download_application(&[0, 1, 2, 3, 4, 5, 6, 7, 8], &mut NoDelay::new()),
+        Error::InvalidInputData
+    );
+    destroy(sensor);
+}
+
+#[test]
+fn can_download_app() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write(
+            DEV_ADDR,
+            vec![Register::REG_BOOT_APP, 0, 1, 2, 3, 4, 5, 6, 7],
+        ),
+        I2cTrans::write(
+            DEV_ADDR,
+            vec![Register::REG_BOOT_APP, 8, 9, 10, 11, 12, 13, 14, 15],
+        ),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor
+        .download_application(
+            &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            &mut NoDelay::new(),
+        )
+        .unwrap();
     destroy(sensor);
 }
