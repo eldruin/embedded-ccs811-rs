@@ -30,10 +30,7 @@ where
 
     fn raw_data(&mut self) -> Result<(u8, u16), Self::Error> {
         let data = self.read_register_2bytes(Register::RAW_DATA)?;
-        Ok((
-            (data[1] >> 2) as u8,
-            u16::from(data[0]) | (u16::from(data[1] & 0x3) << 8),
-        ))
+        Ok(handle_raw_data(data[0], data[1]))
     }
 
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error> {
@@ -47,13 +44,21 @@ where
         } else if (status & BitFlags::DATA_READY) == 0 {
             return Err(nb::Error::WouldBlock);
         }
+        let raw = handle_raw_data(data[6], data[7]);
         Ok(AlgorithmResult {
             eco2: (u16::from(data[0]) << 8) | u16::from(data[1]),
             etvoc: (u16::from(data[2]) << 8) | u16::from(data[3]),
-            raw_current: (data[7] >> 2) as u8,
-            raw_voltage: u16::from(data[6]) | (u16::from(data[7] & 0x3) << 8),
+            raw_current: raw.0,
+            raw_voltage: raw.1,
         })
     }
+}
+
+fn handle_raw_data(data0: u8, data1: u8) -> (u8, u16) {
+    (
+        (data1 >> 2) as u8,
+        u16::from(data0) | (u16::from(data1 & 0x3) << 8),
+    )
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
