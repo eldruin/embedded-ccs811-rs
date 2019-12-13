@@ -4,7 +4,7 @@ use crate::{
     Ccs811Awake, Error, ErrorAwake, InterruptMode, MeasurementMode, Register,
 };
 
-impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::Boot>
+impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::App>
 where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
@@ -153,7 +153,7 @@ fn handle_raw_data(data0: u8, data1: u8) -> (u8, u16) {
     )
 }
 
-impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
+impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::App>
 where
     I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
