@@ -153,7 +153,7 @@
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811Awake::new(dev, address);
 //! let mut sensor = sensor.start_application().ok().unwrap();
-//! let temp_c = 25;
+//! let temp_c = 25.0;
 //! let rel_humidity = 50.0;
 //! sensor.set_environment(rel_humidity, temp_c).unwrap();
 //! # }
