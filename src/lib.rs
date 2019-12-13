@@ -134,7 +134,8 @@
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
-//! let mut sensor = Ccs811Awake::new(dev, address);
+//! let sensor = Ccs811Awake::new(dev, address);
+//! let mut sensor = sensor.start_application().ok().unwrap();
 //! let baseline = sensor.baseline().unwrap();
 //! // ...
 //! sensor.set_baseline(baseline).unwrap();
@@ -150,7 +151,8 @@
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
-//! let mut sensor = Ccs811Awake::new(dev, address);
+//! let sensor = Ccs811Awake::new(dev, address);
+//! let mut sensor = sensor.start_application().ok().unwrap();
 //! let temp_c = 25;
 //! let rel_humidity = 50.0;
 //! sensor.set_environment(rel_humidity, temp_c).unwrap();
@@ -169,7 +171,7 @@
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811Awake::new(dev, address);
-//! let mut sensor.start_application().ok().unwrap();
+//! let mut sensor = sensor.start_application().ok().unwrap();
 //! sensor.set_eco2_thresholds(1500, 2500).unwrap();
 //! sensor.set_interrupt_mode(InterruptMode::OnThresholdCrossed).unwrap();
 //! sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
