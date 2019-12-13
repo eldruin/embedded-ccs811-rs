@@ -1,11 +1,57 @@
-//! This is a platform agnostic Rust driver for the CCS811 high-accuracy
-//! ambient light sensor using the [`embedded-hal`] traits.
+//! This is a platform agnostic Rust driver for the CCS811 ultra-low power
+//! digital VOC sensor for monitoring indoor air quality (IAQ) using
+//! the [`embedded-hal`] traits.
 //!
 //! [`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 //!
-//! <!--TODO
 //! This driver allows you to:
-//! -->
+//! - In application mode:
+//!     - Set the measurement mode. See: [`set_mode()`].
+//!     - Check if there is new data ready. See: [`has_data_ready()`].
+//!     - Get the algoritm and raw result data. See: [`data()`].
+//!     - Get the raw data. See: [`raw_data()`].
+//!     - Get the current baseline. See: [`baseline()`].
+//!     - Set the baseline. See: [`set_baseline()`].
+//!     - Set the environment temperature and relative humidity. See: [`set_environment()`].
+//!     - Set the interrupt mode. See: [`set_interrupt_mode()`].
+//!     - Set the eCO2 thresholds for interrupts. See: [`set_eco2_thresholds()`].
+//! - In boot mode:
+//!     - Start application. See: [`start_application()`].
+//!     - Reset, erase, download and verify new application. See: [`update_application()`].
+//!     - Erase application. See: [`erase_application()`].
+//!     - Verify application. See: [`verify_application()`].
+//!     - Download application. See: [`download_application()`].
+//! - In either mode:
+//!     - Get the firmware mode. See: [`firmware_mode()`].
+//!     - Check whether a valid application is loaded. See: [`has_valid_app()`].
+//!     - Get the hardware ID. See: [`hardware_id()`].
+//!     - Get the hardware version. See: [`hardware_version()`].
+//!     - Get the firmware bootloader version. See: [`firmware_bootloader_version()`].
+//!     - Get the firmware application version. See: [`firmware_application_version()`].
+//!     - Do a software reset. See: [`software_reset()`].
+//!
+//! [`set_mode()`]: trait.Ccs811AppMode.html#tymethod.set_mode
+//! [`has_data_ready()`]: trait.Ccs811AppMode.html#tymethod.has_data_ready
+//! [`data()`]: trait.Ccs811AppMode.html#tymethod.data
+//! [`raw_data()`]: trait.Ccs811AppMode.html#tymethod.raw_data
+//! [`baseline()`]: trait.Ccs811AppMode.html#tymethod.baseline
+//! [`set_baseline()`]: trait.Ccs811AppMode.html#tymethod.set_baseline
+//! [`set_environment()`]: trait.Ccs811AppMode.html#tymethod.set_environment
+//! [`set_interrupt_mode()`]: trait.Ccs811AppMode.html#tymethod.set_interrupt_mode
+//! [`set_eco2_thresholds()`]: trait.Ccs811AppMode.html#tymethod.set_eco2_thresholds
+//! [`start_application()`]: trait.Ccs811BootMode.html#tymethod.start_application
+//! [`update_application()`]: trait.Ccs811BootMode.html#tymethod.update_application
+//! [`erase_application()`]: trait.Ccs811BootMode.html#tymethod.erase_application
+//! [`verify_application()`]: trait.Ccs811BootMode.html#tymethod.verify_application
+//! [`download_application()`]: trait.Ccs811BootMode.html#tymethod.download_application
+//! [`firmware_mode()`]: trait.Ccs811Device.html#tymethod.firmware_mode
+//! [`has_valid_app()`]: trait.Ccs811Device.html#tymethod.has_valid_app
+//! [`hardware_id()`]: trait.Ccs811Device.html#tymethod.hardware_id
+//! [`hardware_version()`]: trait.Ccs811Device.html#tymethod.hardware_version
+//! [`firmware_bootloader_version()`]: trait.Ccs811Device.html#tymethod.firmware_bootloader_version
+//! [`firmware_application_version()`]: trait.Ccs811Device.html#tymethod.firmware_application_version
+//! [`software_reset()`]: trait.Ccs811Device.html#tymethod.software_reset
+//!
 //! <!-- TODO
 //! [Introductory blog post](TODO)
 //! -->

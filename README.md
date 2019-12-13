@@ -7,12 +7,36 @@
 [![Build Status](https://travis-ci.org/eldruin/ccs811-rs.svg?branch=master)](https://travis-ci.org/eldruin/ccs811-rs)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ccs811-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ccs811-rs?branch=master)
 
-This is a platform agnostic Rust driver for the CCS811 ultra-low power digital
-gas sensor for monitoring indoor air quality using the [`embedded-hal`] traits.
+This is a platform agnostic Rust driver for the CCS811 ultra-low power
+digital VOC sensor for monitoring indoor air quality (IAQ) using
+the [`embedded-hal`] traits.
 
-<!--TODO
 This driver allows you to:
--->
+- In application mode:
+    - Set the measurement mode. See: `set_mode()`.
+    - Check if there is new data ready. See: `has_data_ready()`.
+    - Get the algoritm and raw result data. See: `data()`.
+    - Get the raw data. See: `raw_data()`.
+    - Get the current baseline. See: `baseline()`.
+    - Set the baseline. See: `set_baseline()`.
+    - Set the environment temperature and relative humidity. See: `set_environment()`.
+    - Set the interrupt mode. See: `set_interrupt_mode()`.
+    - Set the eCO2 thresholds for interrupts. See: `set_eco2_thresholds()`.
+- In boot mode:
+    - Start application. See: `start_application()`.
+    - Reset, erase, download and verify new application. See: `update_application()`.
+    - Erase application. See: `erase_application()`.
+    - Verify application. See: `verify_application()`.
+    - Download application. See: `download_application()`.
+- In either mode:
+    - Get the firmware mode. See: `firmware_mode()`.
+    - Check whether a valid application is loaded. See: `has_valid_app()`.
+    - Get the hardware ID. See: `hardware_id()`.
+    - Get the hardware version. See: `hardware_version()`.
+    - Get the firmware bootloader version. See: `firmware_bootloader_version()`.
+    - Get the firmware application version. See: `firmware_application_version()`.
+    - Do a software reset. See: `software_reset()`.
+
 <!-- TODO
 [Introductory blog post]()
 -->
