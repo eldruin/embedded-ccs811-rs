@@ -1,5 +1,5 @@
 extern crate linux_embedded_hal as hal;
-use ccs811::{prelude::*, Ccs811, SlaveAddr};
+use ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
 use nb::block;
 
 fn main() {
@@ -9,6 +9,7 @@ fn main() {
     let address = SlaveAddr::default();
     let sensor = Ccs811::new(dev, address, nwake, delay);
     let mut sensor = sensor.start_application().ok().unwrap();
+    sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
     loop {
         let data = block!(sensor.data()).unwrap();
         println!("eCO2: {}, eTVOC: {}", data.eco2, data.etvoc);

@@ -84,6 +84,118 @@
 //! - [Datasheet](https://ams.com/documents/20143/36005/CCS811_DS000459_7-00.pdf)
 //! - [Programming and interfacing guide](https://ams.com/documents/20143/36005/CCS811_AN000369_2-00.pdf)
 //!
+//! ## Usage examples (see also examples folder)
+//!
+//! To use this driver, import this crate and an `embedded_hal` implementation,
+//! then instantiate the appropriate device.
+//!
+//! The CCS811 can be placed in sleep and woken up only for communication.
+//! This driver provides two structures: `Ccs811Awake` and `Ccs811` depeding
+//! on the waking state.
+//!
+//! The `Ccs811Awake` assumes an awake device and handles only the I2C communication.
+//! This can be used when the waking up and sleep of the device is handled
+//! manually.
+//! Additionally a wrapper `Ccs811` is provided, which handles waking up
+//! the device before each operation and putting it to sleep afterwards.
+//!
+//! Please find additional examples using hardware in this repository: [driver-examples]
+//!
+//! [driver-examples]: https://github.com/eldruin/driver-examples
+//!
+//! ### Start the application and take measurements
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! use ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
+//! use nb::block;
+//!
+//! # fn main() {
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let nwake = hal::Pin::new(17);
+//! let delay = hal::Delay {};
+//! let address = SlaveAddr::default();
+//! let sensor = Ccs811::new(dev, address, nwake, delay);
+//! let mut sensor = sensor.start_application().ok().unwrap();
+//! sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
+//! loop {
+//!     let data = block!(sensor.data()).unwrap();
+//!     println!("eCO2: {}, eTVOC: {}", data.eco2, data.etvoc);
+//! }
+//! # }
+//! ```
+//!
+//! ### Save and restore the baseline
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//!
+//! # fn main() {
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let address = SlaveAddr::default();
+//! let mut sensor = Ccs811Awake::new(dev, address);
+//! let baseline = sensor.baseline().unwrap();
+//! // ...
+//! sensor.set_baseline(baseline).unwrap();
+//! # }
+//! ```
+//!
+//! ### Set the environment temperature and relative humidity
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//!
+//! # fn main() {
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let address = SlaveAddr::default();
+//! let mut sensor = Ccs811Awake::new(dev, address);
+//! let temp_c = 25;
+//! let rel_humidity = 50.0;
+//! sensor.set_environment(rel_humidity, temp_c).unwrap();
+//! # }
+//! ```
+//!
+//! ### Set the eCO2 thresholds and configure interrupts
+//!
+//! Only generate an interrupt when the thresholds are crossed.
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr, InterruptMode, MeasurementMode};
+//!
+//! # fn main() {
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let address = SlaveAddr::default();
+//! let sensor = Ccs811Awake::new(dev, address);
+//! let mut sensor.start_application().ok().unwrap();
+//! sensor.set_eco2_thresholds(1500, 2500).unwrap();
+//! sensor.set_interrupt_mode(InterruptMode::OnThresholdCrossed).unwrap();
+//! sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
+//! # }
+//! ```
+//!
+//! ### Get hardware and firmware information
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//!
+//! # fn main() {
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let address = SlaveAddr::default();
+//! let mut sensor = Ccs811Awake::new(dev, address);
+//! let hw_id = sensor.hardware_id().unwrap();
+//! let hw_ver = sensor.hardware_version().unwrap();
+//! let fw_boot_ver = sensor.firmware_bootloader_version().unwrap();
+//! let fw_app_ver = sensor.firmware_application_version().unwrap();
+//! println!(
+//!     "HW ID: {}, HW version: {:#?}, FW bootloader version: {:#?}, FW app version: {:#?}",
+//!     hw_id, hw_ver, fw_boot_ver, fw_app_ver
+//! );
+//! # }
+//! ```
 
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
