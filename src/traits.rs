@@ -50,14 +50,6 @@ pub trait Ccs811AppMode: private::Sealed {
     /// Check if there is a new data sample ready.
     fn has_data_ready(&mut self) -> Result<bool, Self::Error>;
 
-    /// Get the raw sensor data.
-    ///
-    /// Returns a tuple containing the current and voltage through the sensor in
-    /// the format: (current, voltage).
-    /// The current is a value between 0uA and 63uA.
-    /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
-    fn raw_data(&mut self) -> Result<(u8, u16), Self::Error>;
-
     /// Get the algorithm results data.
     ///
     /// Returns a tuple containing the current and voltage through the sensor in
@@ -65,6 +57,14 @@ pub trait Ccs811AppMode: private::Sealed {
     /// The current is a value between 0uA and 63uA.
     /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
     fn data(&mut self) -> nb::Result<AlgorithmResult, Self::Error>;
+
+    /// Get the raw sensor data.
+    ///
+    /// Returns a tuple containing the current and voltage through the sensor in
+    /// the format: (current, voltage).
+    /// The current is a value between 0uA and 63uA.
+    /// The voltage contains the value as computed in the ADC. (1023 = 1.65V)
+    fn raw_data(&mut self) -> Result<(u8, u16), Self::Error>;
 
     /// Get the current baseline
     fn baseline(&mut self) -> Result<[u8; 2], Self::Error>;
@@ -82,6 +82,9 @@ pub trait Ccs811AppMode: private::Sealed {
         temperature_celsius: f32,
     ) -> Result<(), Self::Error>;
 
+    /// Configure the interrupt generation.
+    fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error>;
+
     /// Set the eCO2 threshold values for interrupt generation (in ppm).
     ///
     /// An interrupt will be asserted if the value moved from the current
@@ -91,9 +94,6 @@ pub trait Ccs811AppMode: private::Sealed {
         low_to_medium: u16,
         medium_to_high: u16,
     ) -> Result<(), Self::Error>;
-
-    /// Configure the interrupt generation.
-    fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error>;
 }
 
 /// Methods available when on boot mode
@@ -109,6 +109,17 @@ pub trait Ccs811BootMode: private::Sealed {
     ///
     /// NOTE: after this call 1ms must be waited before sending application commands.
     fn start_application(self) -> Result<Self::TargetType, Self::ModeChangeError>;
+
+    /// Reset, erase, download new application and verify it in one step.
+    ///
+    /// This resets the device via a software reset, erases the current application,
+    /// flashes the new binary and verifies it. This takes at least 572ms + 50ms * (bin_size/8).
+    /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
+    fn update_application<D: DelayMs<u16>>(
+        &mut self,
+        bin: &[u8],
+        delay: &mut D,
+    ) -> Result<(), Self::Error>;
 
     /// Verify application.
     ///
@@ -127,17 +138,6 @@ pub trait Ccs811BootMode: private::Sealed {
     /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
     /// This takes at least 50ms * (bin_size/8).
     fn download_application<D: DelayMs<u16>>(
-        &mut self,
-        bin: &[u8],
-        delay: &mut D,
-    ) -> Result<(), Self::Error>;
-
-    /// Reset, erase, download new application and verify it in one step.
-    ///
-    /// This resets the device via a software reset, erases the current application,
-    /// flashes the new binary and verifies it. This takes at least 572ms + 50ms * (bin_size/8).
-    /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
-    fn update_application<D: DelayMs<u16>>(
         &mut self,
         bin: &[u8],
         delay: &mut D,
