@@ -83,6 +83,16 @@ where
         self.read_register_2bytes(Register::BASELINE)
     }
 
+    fn set_baseline(&mut self, baseline: [u8; 2]) -> Result<(), Self::Error> {
+        self.i2c
+            .write(
+                self.address,
+                &[Register::BASELINE, baseline[0], baseline[1]],
+            )
+            .map_err(ErrorAwake::I2C)?;
+        self.check_status_error()
+    }
+
     fn set_eco2_thresholds(
         &mut self,
         low_to_medium: u16,
@@ -169,6 +179,10 @@ where
 
     fn baseline(&mut self) -> Result<[u8; 2], Self::Error> {
         self.on_awaken(|s| s.dev.baseline())
+    }
+
+    fn set_baseline(&mut self, baseline: [u8; 2]) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.set_baseline(baseline))
     }
 
     fn set_environment(

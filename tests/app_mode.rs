@@ -96,6 +96,18 @@ fn can_read_baseline() {
     destroy(sensor);
 }
 
+#[test]
+fn can_set_baseline() {
+    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
+    let transactions = [
+        I2cTrans::write(DEV_ADDR, vec![Register::BASELINE, 0x34, 0x52]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let mut sensor = new(&transactions, nwake);
+    sensor.set_baseline([0x34, 0x52]).unwrap();
+    destroy(sensor);
+}
+
 macro_rules! invalid_env_test {
     ($name:ident, $rh:expr, $temp:expr) => {
         #[test]

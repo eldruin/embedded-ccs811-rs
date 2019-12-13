@@ -69,6 +69,9 @@ pub trait Ccs811AppMode: private::Sealed {
     /// Get the current baseline
     fn baseline(&mut self) -> Result<[u8; 2], Self::Error>;
 
+    /// Set the baseline
+    fn set_baseline(&mut self, baseline: [u8; 2]) -> Result<(), Self::Error>;
+
     /// Set the environment temperature and relative humidity.
     ///
     /// The humidity must be provided as percentage: [0.0..100.0].
