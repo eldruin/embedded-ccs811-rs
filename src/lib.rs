@@ -107,7 +107,7 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! use ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
+//! use embedded_ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
 //! use nb::block;
 //!
 //! # fn main() {
@@ -129,7 +129,7 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -146,7 +146,7 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -165,7 +165,7 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr, InterruptMode, MeasurementMode};
+//! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr, InterruptMode, MeasurementMode};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -182,7 +182,7 @@
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
-//! use ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
+//! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
