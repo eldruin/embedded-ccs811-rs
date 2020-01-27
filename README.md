@@ -69,7 +69,6 @@ Documentation:
 - [Datasheet](https://ams.com/documents/20143/36005/CCS811_DS000459_7-00.pdf)
 - [Programming and interfacing guide](https://ams.com/documents/20143/36005/CCS811_AN000369_2-00.pdf)
 
-<!--TODO
 ## Usage
 
 To use this driver, import this crate and an `embedded_hal` implementation,
@@ -80,8 +79,24 @@ Please find additional examples using hardware in this repository: [driver-examp
 [driver-examples]: https://github.com/eldruin/driver-examples
 
 ```rust
+extern crate linux_embedded_hal as hal;
+use embedded_ccs811::{prelude::*, Ccs811, MeasurementMode, SlaveAddr};
+use nb::block;
+
+fn main() {
+    let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+    let nwake = hal::Pin::new(17);
+    let delay = hal::Delay {};
+    let address = SlaveAddr::default();
+    let sensor = Ccs811::new(dev, address, nwake, delay);
+    let mut sensor = sensor.start_application().ok().unwrap();
+    sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
+    loop {
+        let data = block!(sensor.data()).unwrap();
+        println!("eCO2: {}, eTVOC: {}", data.eco2, data.etvoc);
+    }
+}
 ```
--->
 
 ## Support
 
