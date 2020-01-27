@@ -1,5 +1,5 @@
 [package]
-name = "ccs811"
+name = "embedded-ccs811"
 version = "0.1.0"
 authors = ["Diego Barrios Romero <eldruin@gmail.com>"]
 repository = "https://github.com/eldruin/ccs811-rs"
@@ -9,7 +9,7 @@ readme = "README.md"
 keywords = ["gas", "air", "quality", "sensor", "embedded-hal-driver"]
 categories = ["embedded", "hardware-support", "no-std"]
 homepage = "https://github.com/eldruin/ccs811-rs"
-documentation = "https://docs.rs/ccs811"
+documentation = "https://docs.rs/embedded-ccs811"
 include = [
     "/**/*.rs",
     "/Cargo.toml",

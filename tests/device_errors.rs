@@ -1,4 +1,4 @@
-use ccs811::{prelude::*, DeviceError, Error};
+use embedded_ccs811::{prelude::*, DeviceError, Error};
 use embedded_hal_mock::{
     i2c::Transaction as I2cTrans,
     pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},

@@ -1,4 +1,4 @@
-use ccs811::{mode, Ccs811, SlaveAddr};
+use embedded_ccs811::{mode, Ccs811, SlaveAddr};
 use embedded_hal_mock::{
     delay::MockNoop as NoDelay,
     i2c::{Mock as I2cMock, Transaction as I2cTrans},
