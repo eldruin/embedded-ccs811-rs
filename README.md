@@ -1,8 +1,8 @@
 # Rust CCS811 Driver: Ultra-low Power Digital Gas Sensor for Monitoring Indoor Air Quality
 
 <!-- TODO
-[![crates.io](https://img.shields.io/crates/v/ccs811.svg)](https://crates.io/crates/ccs811)
-[![Docs](https://docs.rs/ccs811/badge.svg)](https://docs.rs/ccs811)
+[![crates.io](https://img.shields.io/crates/v/embedded-ccs811.svg)](https://crates.io/crates/embedded-ccs811)
+[![Docs](https://docs.rs/embedded-ccs811/badge.svg)](https://docs.rs/embedded-ccs811)
 -->
 [![Build Status](https://travis-ci.com/eldruin/ccs811-rs.svg?branch=master)](https://travis-ci.com/eldruin/ccs811-rs)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ccs811-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ccs811-rs?branch=master)
