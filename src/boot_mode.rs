@@ -107,7 +107,7 @@ where
         delay: &mut D,
     ) -> Result<(), Self::Error> {
         self.write_sw_reset()?;
-        delay.delay_ms(2);
+        delay.delay_ms(50); // Theoretically 2ms is enough
         match self.erase_application() {
             Err(nb::Error::WouldBlock) => delay.delay_ms(500),
             Err(nb::Error::Other(e)) => return Err(e),
