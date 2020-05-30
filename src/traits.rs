@@ -1,6 +1,5 @@
 use crate::{private, AlgorithmResult, FirmwareMode, InterruptMode, MeasurementMode};
 use embedded_hal::blocking::delay::DelayMs;
-use nb;
 
 /// General CCS811 methods available in either mode
 pub trait Ccs811Device: private::Sealed {

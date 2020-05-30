@@ -6,7 +6,6 @@ use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
     Error, ErrorAwake, ModeChangeError, Register,
 };
-use nb;
 
 impl<I2C, E> Ccs811BootMode for Ccs811Awake<I2C, mode::Boot>
 where

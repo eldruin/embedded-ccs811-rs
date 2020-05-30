@@ -4,7 +4,6 @@ use crate::{
     FirmwareMode, ModeChangeError, Register, SlaveAddr,
 };
 use core::marker::PhantomData;
-use nb;
 
 impl<I2C, NWAKE, WAKEDELAY> Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot> {
     /// Create new instance of the CCS811 device.
