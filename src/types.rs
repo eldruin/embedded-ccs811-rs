@@ -47,58 +47,21 @@ impl<CommE, PinE> From<ErrorAwake<CommE>> for Error<CommE, PinE> {
     }
 }
 
-/// Array of possible errors since multiple sources are possible.
-///
-/// You can index by `DeviceError` to check for each error variant.
-/// They are encoded as a bitmask.
-#[derive(Debug)]
-pub struct DeviceErrors(pub(crate) [bool; 6]);
-
-use core::ops::{Index, IndexMut};
-
-impl Index<DeviceError> for DeviceErrors {
-    type Output = bool;
-
-    fn index(&self, idx: DeviceError) -> &Self::Output {
-        match idx {
-            DeviceError::InvalidRegisterWrite => &self.0[0],
-            DeviceError::InvalidRegisterRead => &self.0[1],
-            DeviceError::InvalidMeasurement => &self.0[2],
-            DeviceError::MaxResistence => &self.0[3],
-            DeviceError::HeaterFault => &self.0[4],
-            DeviceError::HeaterSupply => &self.0[5],
-        }
-    }
-}
-
-impl IndexMut<DeviceError> for DeviceErrors {
-    fn index_mut(&mut self, idx: DeviceError) -> &mut Self::Output {
-        match idx {
-            DeviceError::InvalidRegisterWrite => &mut self.0[0],
-            DeviceError::InvalidRegisterRead => &mut self.0[1],
-            DeviceError::InvalidMeasurement => &mut self.0[2],
-            DeviceError::MaxResistence => &mut self.0[3],
-            DeviceError::HeaterFault => &mut self.0[4],
-            DeviceError::HeaterSupply => &mut self.0[5],
-        }
-    }
-}
-
-/// Errors reported by the device
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DeviceError {
+/// Errors reported by the device.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub struct DeviceErrors {
     /// I2C write to an invalid register reported by device.
-    InvalidRegisterWrite,
+    pub invalid_register_write: bool,
     /// I2C read from an invalid register reported by device.
-    InvalidRegisterRead,
+    pub invalid_register_read: bool,
     /// Invalid measurement reported by device.
-    InvalidMeasurement,
+    pub invalid_measurement: bool,
     /// Sensor resistance measurement reached or exceeded the maximum range reported by device.
-    MaxResistence,
+    pub max_resistance: bool,
     /// Heater current not in range reported by device.
-    HeaterFault,
+    pub heater_fault: bool,
     /// Heater current not applied correctly reported by device.
-    HeaterSupply,
+    pub heater_supply: bool,
 }
 
 /// Error type for mode changes when using `Ccs811`.
@@ -211,16 +174,5 @@ mod tests {
     fn can_generate_alternative_addresses() {
         assert_eq!(0x5A, SlaveAddr::Alternative(false).addr());
         assert_eq!(0x5B, SlaveAddr::Alternative(true).addr());
-    }
-
-    #[test]
-    fn can_index_device_errors() {
-        let errors = DeviceErrors([true; 6]);
-        assert!(errors[DeviceError::InvalidRegisterWrite]);
-        assert!(errors[DeviceError::InvalidRegisterRead]);
-        assert!(errors[DeviceError::InvalidMeasurement]);
-        assert!(errors[DeviceError::MaxResistence]);
-        assert!(errors[DeviceError::HeaterFault]);
-        assert!(errors[DeviceError::HeaterSupply]);
     }
 }

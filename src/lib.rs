@@ -215,8 +215,8 @@ mod traits;
 pub use crate::traits::{Ccs811AppMode, Ccs811BootMode, Ccs811Device};
 mod types;
 pub use crate::types::{
-    AlgorithmResult, DeviceError, DeviceErrors, Error, ErrorAwake, FirmwareMode, InterruptMode,
-    MeasurementMode, ModeChangeError, SlaveAddr,
+    AlgorithmResult, DeviceErrors, Error, ErrorAwake, FirmwareMode, InterruptMode, MeasurementMode,
+    ModeChangeError, SlaveAddr,
 };
 
 /// CCS811 device driver

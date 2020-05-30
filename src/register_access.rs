@@ -1,4 +1,4 @@
-use crate::{hal, Ccs811Awake, DeviceError, DeviceErrors, ErrorAwake};
+use crate::{hal, Ccs811Awake, DeviceErrors, ErrorAwake};
 
 pub(crate) struct Register {}
 impl Register {
@@ -104,29 +104,29 @@ where
 
 pub(crate) fn get_errors(error_id: u8) -> Result<(), DeviceErrors> {
     let mut has_error = false;
-    let mut errors = DeviceErrors([false; 6]);
+    let mut errors = DeviceErrors::default();
     if (error_id & BitFlags::WRITE_REG_INVALID) != 0 {
-        errors[DeviceError::InvalidRegisterWrite] = true;
+        errors.invalid_register_write = true;
         has_error = true;
     }
     if (error_id & BitFlags::READ_REG_INVALID) != 0 {
-        errors[DeviceError::InvalidRegisterRead] = true;
+        errors.invalid_register_read = true;
         has_error = true;
     }
     if (error_id & BitFlags::MEASMODE_INVALID) != 0 {
-        errors[DeviceError::InvalidMeasurement] = true;
+        errors.invalid_measurement = true;
         has_error = true;
     }
     if (error_id & BitFlags::MAX_RESISTANCE) != 0 {
-        errors[DeviceError::MaxResistence] = true;
+        errors.max_resistance = true;
         has_error = true;
     }
     if (error_id & BitFlags::HEATER_FAULT) != 0 {
-        errors[DeviceError::HeaterFault] = true;
+        errors.heater_fault = true;
         has_error = true;
     }
     if (error_id & BitFlags::HEATER_SUPPLY) != 0 {
-        errors[DeviceError::HeaterSupply] = true;
+        errors.heater_supply = true;
         has_error = true;
     }
     if has_error {
