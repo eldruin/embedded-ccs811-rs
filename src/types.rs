@@ -104,6 +104,7 @@ pub enum DeviceError {
 /// Error type for mode changes when using `Ccs811`.
 ///
 /// This allows to retrieve the unchanged device in case of an error.
+#[derive(Debug)]
 pub struct ModeChangeError<E, DEV> {
     /// Unchanged device.
     pub dev: DEV,
