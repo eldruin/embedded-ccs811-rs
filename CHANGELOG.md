@@ -13,5 +13,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release to crates.io.
 
-[Unreleased]: https://github.com/eldruin/ccs811-rs/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/eldruin/ccs811-rs/releases/tag/v0.1.0
+[Unreleased]: https://github.com/eldruin/embedded-ccs811-rs/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/eldruin/embedded-ccs811-rs/releases/tag/v0.1.0
