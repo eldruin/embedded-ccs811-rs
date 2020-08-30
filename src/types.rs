@@ -122,7 +122,7 @@ pub enum InterruptMode {
 }
 
 /// Algorithm result
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct AlgorithmResult {
     /// eCO2 result in ppm
     pub eco2: u16,
