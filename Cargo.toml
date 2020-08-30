@@ -31,6 +31,8 @@ nb = "1"
 [dev-dependencies]
 linux-embedded-hal = "0.3"
 embedded-hal-mock = "0.7"
+shared-bus = { version ="0.2", features = ["std"] }
+hdc20xx = "0.1"
 
 [profile.release]
 lto = true
