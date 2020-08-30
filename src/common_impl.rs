@@ -68,8 +68,7 @@ where
     pub(crate) fn write_sw_reset(&mut self) -> Result<(), ErrorAwake<E>> {
         self.i2c
             .write(self.address, &[Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A])
-            .map_err(ErrorAwake::I2C)?;
-        self.check_status_error()
+            .map_err(ErrorAwake::I2C)
     }
 }
 

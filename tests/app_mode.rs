@@ -284,7 +284,6 @@ fn can_do_software_reset() {
         I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
         // started
         I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
-        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
     ];
     let sensor = new_app(&transactions, nwake);
     let sensor = sensor.software_reset().ok().unwrap();

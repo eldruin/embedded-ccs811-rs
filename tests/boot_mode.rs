@@ -132,7 +132,6 @@ fn can_update_app() {
     let transactions = [
         I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
         I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
-        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
         I2cTrans::write(DEV_ADDR, vec![Register::APP_ERASE, 0xE7, 0xA7, 0xE6, 0x09]),
         I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
         I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_ERASE]),
@@ -163,10 +162,10 @@ fn can_update_app() {
 #[test]
 fn can_do_software_reset() {
     let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
-    let transactions = [
-        I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
-        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
-    ];
+    let transactions = [I2cTrans::write(
+        DEV_ADDR,
+        vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A],
+    )];
     let mut sensor = new(&transactions, nwake);
     sensor.software_reset().unwrap();
     destroy(sensor);
