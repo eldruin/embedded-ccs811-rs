@@ -6,7 +6,6 @@ use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
     Error, ErrorAwake, ModeChangeError, Register,
 };
-use nb::block;
 
 impl<I2C, E> Ccs811BootMode for Ccs811Awake<I2C, mode::Boot>
 where
@@ -108,20 +107,23 @@ where
         delay: &mut D,
     ) -> Result<(), Self::Error> {
         self.write_sw_reset()?;
-        delay.delay_ms(50); // Theoretically 2ms is enough
-        match self.erase_application() {
-            Err(nb::Error::WouldBlock) => delay.delay_ms(500),
-            Err(nb::Error::Other(e)) => return Err(e),
-            Ok(_) => (),
+        delay.delay_ms(2000);
+        loop {
+            match self.erase_application() {
+                Err(nb::Error::WouldBlock) => delay.delay_ms(500),
+                Err(nb::Error::Other(e)) => return Err(e),
+                Ok(_) => break,
+            }
         }
-        block!(self.erase_application())?;
         self.download_application(bin, delay)?;
-        match self.verify_application() {
-            Err(nb::Error::WouldBlock) => delay.delay_ms(70),
-            Err(nb::Error::Other(e)) => return Err(e),
-            Ok(_) => (),
+        loop {
+            match self.verify_application() {
+                Err(nb::Error::WouldBlock) => delay.delay_ms(70),
+                Err(nb::Error::Other(e)) => return Err(e),
+                Ok(_) => break,
+            }
         }
-        block!(self.verify_application())
+        Ok(())
     }
 
     // Note: is_verifying is false after a reset
