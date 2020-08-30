@@ -6,25 +6,31 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        panic!(
-            "Invalid number of arguments.\n\
-                The path to the firmware binary file must be provided.\n\
-                Probably called 'CCS811_SW000246_1-00.bin'."
-        );
-    }
-    let data = read_firmware(&PathBuf::from(&args[1]));
-    println!("Read firmware file. Length: {} bytes", data.len());
     let dev = I2cdev::new("/dev/i2c-1").unwrap();
     let mut delay = Delay {};
     let address = SlaveAddr::default();
     let mut sensor = Ccs811Awake::new(dev, address);
     println!("Current status:");
     print_status(&mut sensor);
-    println!("Starting update process: Reset, erase, download, verify.");
+
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        panic!(
+            "Invalid number of arguments.\n\
+                The path to the firmware binary file must be provided for flashing.\n\
+                Probably called 'CCS811_SW000246_1-00.bin'."
+        );
+    }
+    let data = read_firmware(&PathBuf::from(&args[1]));
+    println!("Read firmware file. Length: {} bytes", data.len());
+
+    println!("Starting update process: Reset, erase, download, verify...");
     let result = sensor.update_application(&data, &mut delay);
-    println!("Update result: {:?}", result);
+    match result {
+        Err(e) => println!("An error occurred: {:?}", e),
+        Ok(_) => println!("Update was successful!"),
+    }
+
     println!("Status:");
     print_status(&mut sensor);
 }
