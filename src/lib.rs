@@ -218,6 +218,7 @@ pub use crate::types::{
     AlgorithmResult, DeviceErrors, Error, ErrorAwake, FirmwareMode, InterruptMode, MeasurementMode,
     ModeChangeError, SlaveAddr,
 };
+pub use nb;
 
 /// CCS811 device driver
 ///
