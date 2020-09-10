@@ -52,9 +52,7 @@
 //! [`firmware_application_version()`]: trait.Ccs811Device.html#tymethod.firmware_application_version
 //! [`software_reset()`]: trait.Ccs811Device.html#tymethod.software_reset
 //!
-//! <!-- TODO
-//! [Introductory blog post](TODO)
-//! -->
+//! [Introductory blog post](https://blog.eldruin.com/ccs811-indoor-air-quality-sensor-driver-in-rust)
 //!
 //! ## The device
 //!

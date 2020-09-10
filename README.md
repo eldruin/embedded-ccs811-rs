@@ -35,9 +35,7 @@ This driver allows you to:
     - Get the firmware application version. See: `firmware_application_version()`.
     - Do a software reset. See: `software_reset()`.
 
-<!-- TODO
-[Introductory blog post]()
--->
+[Introductory blog post](https://blog.eldruin.com/ccs811-indoor-air-quality-sensor-driver-in-rust)
 
 ## The device
 
