@@ -106,14 +106,13 @@
 //! ### Start the application and take measurements
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
+//! use linux_embedded_hal::{I2cdev, Pin, Delay};
 //! use embedded_ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
 //! use nb::block;
 //!
-//! # fn main() {
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let nwake = hal::Pin::new(17);
-//! let delay = hal::Delay {};
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let nwake = Pin::new(17);
+//! let delay = Delay {};
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811::new(dev, address, nwake, delay);
 //! let mut sensor = sensor.start_application().ok().unwrap();
@@ -122,41 +121,36 @@
 //!     let data = block!(sensor.data()).unwrap();
 //!     println!("eCO2: {}, eTVOC: {}", data.eco2, data.etvoc);
 //! }
-//! # }
 //! ```
 //!
 //! ### Save and restore the baseline
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
+//! use linux_embedded_hal::I2cdev;
 //! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
-//! # fn main() {
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811Awake::new(dev, address);
 //! let mut sensor = sensor.start_application().ok().unwrap();
 //! let baseline = sensor.baseline().unwrap();
 //! // ...
 //! sensor.set_baseline(baseline).unwrap();
-//! # }
 //! ```
 //!
 //! ### Set the environment temperature and relative humidity
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
+//! use linux_embedded_hal::I2cdev;
 //! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
-//! # fn main() {
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811Awake::new(dev, address);
 //! let mut sensor = sensor.start_application().ok().unwrap();
 //! let temp_c = 25.0;
 //! let rel_humidity = 50.0;
 //! sensor.set_environment(rel_humidity, temp_c).unwrap();
-//! # }
 //! ```
 //!
 //! ### Set the eCO2 thresholds and configure interrupts
@@ -164,28 +158,25 @@
 //! Only generate an interrupt when the thresholds are crossed.
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
+//! use linux_embedded_hal::I2cdev;
 //! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr, InterruptMode, MeasurementMode};
 //!
-//! # fn main() {
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811Awake::new(dev, address);
 //! let mut sensor = sensor.start_application().ok().unwrap();
 //! sensor.set_eco2_thresholds(1500, 2500).unwrap();
 //! sensor.set_interrupt_mode(InterruptMode::OnThresholdCrossed).unwrap();
 //! sensor.set_mode(MeasurementMode::ConstantPower1s).unwrap();
-//! # }
 //! ```
 //!
 //! ### Get hardware and firmware information
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
+//! use linux_embedded_hal::I2cdev;
 //! use embedded_ccs811::{prelude::*, Ccs811Awake, SlaveAddr};
 //!
-//! # fn main() {
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
 //! let address = SlaveAddr::default();
 //! let mut sensor = Ccs811Awake::new(dev, address);
 //! let hw_id = sensor.hardware_id().unwrap();
@@ -196,7 +187,6 @@
 //!     "HW ID: {}, HW version: {:#?}, FW bootloader version: {:#?}, FW app version: {:#?}",
 //!     hw_id, hw_ver, fw_boot_ver, fw_app_ver
 //! );
-//! # }
 //! ```
 
 #![deny(unsafe_code, missing_docs)]
