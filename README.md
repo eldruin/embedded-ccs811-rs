@@ -62,8 +62,8 @@ low-power consumption during an active sensor measurement and idle mode
 extending battery life in portable applications.
 
 Documentation:
-- [Datasheet](https://ams.com/documents/20143/36005/CCS811_DS000459_7-00.pdf)
-- [Programming and interfacing guide](https://ams.com/documents/20143/36005/CCS811_AN000369_2-00.pdf)
+- [Datasheet](https://www.sciosense.com/wp-content/uploads/2020/01/CCS811-Datasheet.pdf)
+- [Programming and interfacing guide](https://www.sciosense.com/wp-content/uploads/2020/01/CCS811-Application-Note-Programming-and-interfacing-guide.pdf)
 
 ## Usage
 
