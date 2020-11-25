@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/embedded-ccs811.svg)](https://crates.io/crates/embedded-ccs811)
 [![Docs](https://docs.rs/embedded-ccs811/badge.svg)](https://docs.rs/embedded-ccs811)
-[![Build Status](https://travis-ci.com/eldruin/embedded-ccs811-rs.svg?branch=master)](https://travis-ci.com/eldruin/embedded-ccs811-rs)
+[![Build Status](https://github.com/eldruin/embedded-ccs811-rs/workflows/Build/badge.svg)](https://github.com/eldruin/embedded-ccs811-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/embedded-ccs811-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/embedded-ccs811-rs?branch=master)
 
 This is a platform agnostic Rust driver for the CCS811 ultra-low power
