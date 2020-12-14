@@ -178,8 +178,6 @@ where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
     type Error = ErrorAwake<E>;
-    type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
-    type BootModeType = Ccs811Awake<I2C, mode::Boot>;
 
     fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error> {
         let status = self.read_status()?;
@@ -214,14 +212,6 @@ where
         let version = self.read_register_2bytes(Register::FW_APP_VERSION)?;
         Ok(((version[0] & 0xF0) >> 4, version[0] & 0xF, version[1]))
     }
-
-    // Note: is_verifying is false after a reset
-    fn software_reset(mut self) -> Result<Self::BootModeType, Self::ModeChangeError> {
-        match self.write_sw_reset() {
-            Err(e) => Err(ModeChangeError::new(self, e)),
-            Ok(_) => Ok(Ccs811Awake::create(self.i2c, self.address)),
-        }
-    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY, MODE> Ccs811Device for Ccs811<I2C, NWAKE, WAKEDELAY, MODE>
@@ -231,8 +221,6 @@ where
     WAKEDELAY: DelayUs<u8>,
 {
     type Error = Error<CommE, PinE>;
-    type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
-    type BootModeType = Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>;
 
     fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error> {
         self.on_awaken(|s| s.dev.firmware_mode())
@@ -256,9 +244,5 @@ where
 
     fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error> {
         self.on_awaken(|s| s.dev.firmware_application_version())
-    }
-
-    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError> {
-        self.wrap_mode_change(|s| s.software_reset())
     }
 }

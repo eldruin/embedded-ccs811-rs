@@ -136,6 +136,11 @@ where
         }
         Ok(())
     }
+
+    // Note: is_verifying is false after a reset
+    fn software_reset(&mut self) -> Result<(), Self::Error> {
+        self.write_sw_reset()
+    }
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811BootMode
@@ -175,5 +180,9 @@ where
         delay: &mut D,
     ) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.update_application(bin, delay))
+    }
+
+    fn software_reset(&mut self) -> Result<(), Self::Error> {
+        self.on_awaken(|s| s.dev.software_reset())
     }
 }

@@ -57,15 +57,3 @@ read_status_test!(can_get_invalid_app, has_valid_app, false, 0);
 read_status_test!(can_get_valid_app, has_valid_app, true, BF::APP_VALID);
 read_status_test!(fw_mode_boot, firmware_mode, FwMode::Boot, 0);
 read_status_test!(fw_mode_app, firmware_mode, FwMode::Application, BF::FW_MODE);
-
-#[test]
-fn can_do_software_reset() {
-    let nwake = PinMock::new(&[PinTrans::set(PinState::Low), PinTrans::set(PinState::High)]);
-    let transactions = [
-        I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
-        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
-    ];
-    let sensor = new(&transactions, nwake);
-    let sensor = sensor.software_reset().ok().unwrap();
-    destroy(sensor);
-}

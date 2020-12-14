@@ -267,3 +267,24 @@ macro_rules! set_int_test {
 set_int_test!(disable_int, Disabled, 0);
 set_int_test!(enable_int_data, OnDataReady, BF::INTERRUPT);
 set_int_test!(en_int_th, OnThresholdCrossed, BF::INTERRUPT | BF::THRESH);
+
+#[test]
+fn can_do_software_reset() {
+    let nwake = PinMock::new(&[
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+        PinTrans::set(PinState::Low),
+        PinTrans::set(PinState::High),
+    ]);
+    let transactions = [
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![BF::APP_VALID]),
+        I2cTrans::write(DEV_ADDR, vec![Register::APP_START]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+        // started
+        I2cTrans::write(DEV_ADDR, vec![Register::SW_RESET, 0x11, 0xE5, 0x72, 0x8A]),
+        I2cTrans::write_read(DEV_ADDR, vec![Register::STATUS], vec![0]),
+    ];
+    let sensor = new_app(&transactions, nwake);
+    let sensor = sensor.software_reset().ok().unwrap();
+    destroy(sensor);
+}

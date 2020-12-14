@@ -1,7 +1,7 @@
 use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use crate::{
     hal, mode, register_access::get_errors, AlgorithmResult, BitFlags, Ccs811, Ccs811AppMode,
-    Ccs811Awake, Error, ErrorAwake, InterruptMode, MeasurementMode, Register,
+    Ccs811Awake, Error, ErrorAwake, InterruptMode, MeasurementMode, ModeChangeError, Register,
 };
 
 impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::App>
@@ -9,6 +9,9 @@ where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
 {
     type Error = ErrorAwake<E>;
+    type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
+    type BootModeType = Ccs811Awake<I2C, mode::Boot>;
+
     fn set_mode(&mut self, mode: MeasurementMode) -> Result<(), Self::Error> {
         let idle_mode = self.meas_mode_reg & 0b0000_1100;
         let meas_mode = match mode {
@@ -124,6 +127,14 @@ where
         self.meas_mode_reg = meas_mode;
         Ok(())
     }
+
+    // Note: is_verifying is false after a reset
+    fn software_reset(mut self) -> Result<Self::BootModeType, Self::ModeChangeError> {
+        match self.write_sw_reset() {
+            Err(e) => Err(ModeChangeError::new(self, e)),
+            Ok(_) => Ok(Ccs811Awake::create(self.i2c, self.address)),
+        }
+    }
 }
 
 fn get_raw_humidity(humidity_percentage: f32) -> (u8, u8) {
@@ -160,6 +171,8 @@ where
     WAKEDELAY: DelayUs<u8>,
 {
     type Error = Error<CommE, PinE>;
+    type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;
+    type BootModeType = Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>;
 
     fn set_mode(&mut self, mode: MeasurementMode) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.set_mode(mode))
@@ -206,6 +219,10 @@ where
 
     fn set_interrupt_mode(&mut self, mode: InterruptMode) -> Result<(), Self::Error> {
         self.on_awaken(|s| s.dev.set_interrupt_mode(mode))
+    }
+
+    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError> {
+        self.wrap_mode_change(|s| s.software_reset())
     }
 }
 

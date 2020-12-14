@@ -6,10 +6,6 @@ use nb;
 pub trait Ccs811Device: private::Sealed {
     /// Error type
     type Error;
-    /// Boot/App mode change error
-    type ModeChangeError;
-    /// Boot mode type
-    type BootModeType;
 
     /// Get the firmware mode.
     fn firmware_mode(&mut self) -> Result<FirmwareMode, Self::Error>;
@@ -28,17 +24,16 @@ pub trait Ccs811Device: private::Sealed {
 
     /// Get the firmware application verion (major, minor, trivial)
     fn firmware_application_version(&mut self) -> Result<(u8, u8, u8), Self::Error>;
-
-    /// Restart the device in boot mode.
-    ///
-    /// 2ms should be waited before doing any other operation.
-    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError>;
 }
 
 /// Methods available when on application mode
 pub trait Ccs811AppMode: private::Sealed {
     /// Error type
     type Error;
+    /// Boot/App mode change error
+    type ModeChangeError;
+    /// Boot mode type
+    type BootModeType;
 
     /// Set the measurement mode
     ///
@@ -94,6 +89,11 @@ pub trait Ccs811AppMode: private::Sealed {
         low_to_medium: u16,
         medium_to_high: u16,
     ) -> Result<(), Self::Error>;
+
+    /// Restart the device in boot mode.
+    ///
+    /// 2ms should be waited before doing any other operation.
+    fn software_reset(self) -> Result<Self::BootModeType, Self::ModeChangeError>;
 }
 
 /// Methods available when on boot mode
@@ -142,4 +142,9 @@ pub trait Ccs811BootMode: private::Sealed {
         bin: &[u8],
         delay: &mut D,
     ) -> Result<(), Self::Error>;
+
+    /// Restart the device in boot mode.
+    ///
+    /// 2ms should be waited before doing any other operation.
+    fn software_reset(&mut self) -> Result<(), Self::Error>;
 }
