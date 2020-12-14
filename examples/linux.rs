@@ -1,5 +1,5 @@
 extern crate linux_embedded_hal as hal;
-use ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
+use ccs811::{prelude::*, Ccs811, MeasurementMode, SlaveAddr};
 use nb::block;
 
 fn main() {
