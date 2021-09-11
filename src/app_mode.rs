@@ -56,12 +56,12 @@ where
         })
     }
 
+    #[allow(clippy::manual_range_contains)] // avoid creating range with exact floats
     fn set_environment(
         &mut self,
         humidity_percentage: f32,
         temperature_celsius: f32,
     ) -> Result<(), Self::Error> {
-        #[allow(clippy::manual_range_contains)] // avoid creating range with exact floats
         if humidity_percentage < 0.0
             || humidity_percentage > 100.0
             || temperature_celsius > 254.998_05
