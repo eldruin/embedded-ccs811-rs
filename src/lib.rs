@@ -104,12 +104,16 @@
 //! ### Start the application and take measurements
 //!
 //! ```no_run
-//! use linux_embedded_hal::{I2cdev, Pin, Delay};
+//! use linux_embedded_hal::{I2cdev, CdevPin, Delay};
+//! use linux_embedded_hal::gpio_cdev::{Chip, LineRequestFlags};
 //! use embedded_ccs811::{prelude::*, Ccs811, SlaveAddr, MeasurementMode};
 //! use nb::block;
 //!
 //! let dev = I2cdev::new("/dev/i2c-1").unwrap();
-//! let nwake = Pin::new(17);
+//! let mut chip = Chip::new("/dev/gpiochip0").unwrap();
+//! let handle = chip.get_line(17).unwrap()
+//!   .request(LineRequestFlags::OUTPUT, 0, "output").unwrap();
+//! let nwake = CdevPin::new(handle).unwrap();
 //! let delay = Delay {};
 //! let address = SlaveAddr::default();
 //! let sensor = Ccs811::new(dev, address, nwake, delay);

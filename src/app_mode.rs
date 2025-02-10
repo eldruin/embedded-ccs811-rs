@@ -1,4 +1,4 @@
-use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
+use crate::hal::{delay::DelayNs, digital::OutputPin};
 use crate::{
     hal, mode, register_access::get_errors, AlgorithmResult, BitFlags, Ccs811, Ccs811AppMode,
     Ccs811Awake, Error, ErrorAwake, InterruptMode, MeasurementMode, ModeChangeError, Register,
@@ -6,7 +6,7 @@ use crate::{
 
 impl<I2C, E> Ccs811AppMode for Ccs811Awake<I2C, mode::App>
 where
-    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     type Error = ErrorAwake<E>;
     type ModeChangeError = ModeChangeError<ErrorAwake<E>, Self>;
@@ -159,17 +159,14 @@ fn get_raw_environment_data(value: f32) -> (u8, u8) {
 }
 
 fn handle_raw_data(data0: u8, data1: u8) -> (u8, u16) {
-    (
-        (data1 >> 2) as u8,
-        u16::from(data0) | (u16::from(data1 & 0x3) << 8),
-    )
+    (data1 >> 2, u16::from(data0) | (u16::from(data1 & 0x3) << 8))
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::App>
 where
-    I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
+    I2C: hal::i2c::I2c<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
-    WAKEDELAY: DelayUs<u8>,
+    WAKEDELAY: DelayNs,
 {
     type Error = Error<CommE, PinE>;
     type ModeChangeError = ModeChangeError<Error<CommE, PinE>, Self>;

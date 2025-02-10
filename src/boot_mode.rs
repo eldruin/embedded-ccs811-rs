@@ -1,7 +1,4 @@
-use crate::hal::{
-    blocking::delay::{DelayMs, DelayUs},
-    digital::v2::OutputPin,
-};
+use crate::hal::{delay::DelayNs, digital::OutputPin};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811BootMode, Ccs811Device,
     Error, ErrorAwake, ModeChangeError, Register,
@@ -9,7 +6,7 @@ use crate::{
 
 impl<I2C, E> Ccs811BootMode for Ccs811Awake<I2C, mode::Boot>
 where
-    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     type Error = ErrorAwake<E>;
     type ModeChangeError = ModeChangeError<Self::Error, Self>;
@@ -81,7 +78,7 @@ where
         }
     }
 
-    fn download_application<D: DelayMs<u16>>(
+    fn download_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,
@@ -101,7 +98,7 @@ where
         self.check_status_error()
     }
 
-    fn update_application<D: DelayMs<u16>>(
+    fn update_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,
@@ -135,9 +132,9 @@ where
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811BootMode
     for Ccs811<I2C, NWAKE, WAKEDELAY, mode::Boot>
 where
-    I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
+    I2C: hal::i2c::I2c<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
-    WAKEDELAY: DelayUs<u8>,
+    WAKEDELAY: DelayNs,
 {
     type Error = Error<CommE, PinE>;
     type ModeChangeError = ModeChangeError<Self::Error, Self>;
@@ -155,7 +152,7 @@ where
         self.on_awaken_nb(|s| s.dev.erase_application())
     }
 
-    fn download_application<D: DelayMs<u16>>(
+    fn download_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,
@@ -163,7 +160,7 @@ where
         self.on_awaken(|s| s.dev.download_application(bin, delay))
     }
 
-    fn update_application<D: DelayMs<u16>>(
+    fn update_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,

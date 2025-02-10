@@ -1,8 +1,8 @@
 use embedded_ccs811::{mode, Ccs811, SlaveAddr};
-use embedded_hal_mock::{
-    delay::MockNoop as NoDelay,
+use embedded_hal_mock::eh1::{
+    delay::NoopDelay as NoDelay,
+    digital::Mock as PinMock,
     i2c::{Mock as I2cMock, Transaction as I2cTrans},
-    pin::Mock as PinMock,
 };
 
 pub const DEV_ADDR: u8 = 0x5A;
