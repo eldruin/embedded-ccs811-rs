@@ -159,10 +159,7 @@ fn get_raw_environment_data(value: f32) -> (u8, u8) {
 }
 
 fn handle_raw_data(data0: u8, data1: u8) -> (u8, u16) {
-    (
-        (data1 >> 2),
-        u16::from(data0) | (u16::from(data1 & 0x3) << 8),
-    )
+    (data1 >> 2, u16::from(data0) | (u16::from(data1 & 0x3) << 8))
 }
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY> Ccs811AppMode for Ccs811<I2C, NWAKE, WAKEDELAY, mode::App>
