@@ -1,5 +1,5 @@
 use crate::{private, AlgorithmResult, FirmwareMode, InterruptMode, MeasurementMode};
-use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::delay::DelayNs;
 
 /// General CCS811 methods available in either mode
 pub trait Ccs811Device: private::Sealed {
@@ -114,7 +114,7 @@ pub trait Ccs811BootMode: private::Sealed {
     /// This resets the device via a software reset, erases the current application,
     /// flashes the new binary and verifies it. This takes at least 572ms + 50ms * (bin_size/8).
     /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
-    fn update_application<D: DelayMs<u16>>(
+    fn update_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,
@@ -136,7 +136,7 @@ pub trait Ccs811BootMode: private::Sealed {
     ///
     /// Returns `Error::InvalidInputData` if the input binary lengh is not multiple of 8.
     /// This takes at least 50ms * (bin_size/8).
-    fn download_application<D: DelayMs<u16>>(
+    fn download_application<D: DelayNs>(
         &mut self,
         bin: &[u8],
         delay: &mut D,

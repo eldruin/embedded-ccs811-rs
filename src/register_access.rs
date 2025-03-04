@@ -41,7 +41,7 @@ impl BitFlags {
 
 impl<I2C, E, MODE> Ccs811Awake<I2C, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     pub(crate) fn check_status_error(&mut self) -> Result<(), ErrorAwake<E>> {
         self.read_status().map(drop)

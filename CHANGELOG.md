@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Updated dependencies
+- [breaking-change] upgrade project to support embedded-hal v1.0.0
 
 ## [0.2.0] - 2020-09-10
 

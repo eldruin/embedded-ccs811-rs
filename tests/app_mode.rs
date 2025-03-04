@@ -1,10 +1,10 @@
 use embedded_ccs811::{
     mode, prelude::*, AlgorithmResult, Ccs811, Error, InterruptMode, MeasurementMode,
 };
-use embedded_hal_mock::{
-    delay::MockNoop as NoDelay,
+use embedded_hal_mock::eh1::{
+    delay::NoopDelay as NoDelay,
+    digital::{Mock as PinMock, State as PinState, Transaction as PinTrans},
     i2c::{Mock as I2cMock, Transaction as I2cTrans},
-    pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
 mod common;
 use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};

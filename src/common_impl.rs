@@ -1,4 +1,4 @@
-use crate::hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
+use crate::hal::{delay::DelayNs, digital::OutputPin};
 use crate::{
     hal, mode, ActionInProgress, BitFlags, Ccs811, Ccs811Awake, Ccs811Device, Error, ErrorAwake,
     FirmwareMode, ModeChangeError, Register, SlaveAddr,
@@ -54,7 +54,7 @@ impl<I2C, MODE> Ccs811Awake<I2C, MODE> {
 
 impl<I2C, E, MODE> Ccs811Awake<I2C, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     /// Destroy driver instance, return I²C bus instance.
     pub fn destroy(self) -> I2C {
@@ -63,7 +63,7 @@ where
 }
 impl<I2C, E, MODE> Ccs811Awake<I2C, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     pub(crate) fn write_sw_reset(&mut self) -> Result<(), ErrorAwake<E>> {
         self.i2c
@@ -74,9 +74,9 @@ where
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY, MODE> Ccs811<I2C, NWAKE, WAKEDELAY, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = CommE>,
+    I2C: hal::i2c::I2c<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
-    WAKEDELAY: DelayUs<u8>,
+    WAKEDELAY: DelayNs,
 {
     /// Destroy driver instance, return I²C bus, nWAKE pin
     /// and wake delay instances.
@@ -173,7 +173,7 @@ where
 
 impl<I2C, E, MODE> Ccs811Device for Ccs811Awake<I2C, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+    I2C: hal::i2c::I2c<Error = E>,
 {
     type Error = ErrorAwake<E>;
 
@@ -214,9 +214,9 @@ where
 
 impl<I2C, CommE, PinE, NWAKE, WAKEDELAY, MODE> Ccs811Device for Ccs811<I2C, NWAKE, WAKEDELAY, MODE>
 where
-    I2C: hal::blocking::i2c::Write<Error = CommE> + hal::blocking::i2c::WriteRead<Error = CommE>,
+    I2C: hal::i2c::I2c<Error = CommE>,
     NWAKE: OutputPin<Error = PinE>,
-    WAKEDELAY: DelayUs<u8>,
+    WAKEDELAY: DelayNs,
 {
     type Error = Error<CommE, PinE>;
 

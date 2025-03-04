@@ -1,8 +1,8 @@
 use embedded_ccs811::{prelude::*, Error};
-use embedded_hal_mock::{
-    delay::MockNoop as NoDelay,
+use embedded_hal_mock::eh1::{
+    delay::NoopDelay as NoDelay,
+    digital::{Mock as PinMock, State as PinState, Transaction as PinTrans},
     i2c::Transaction as I2cTrans,
-    pin::{Mock as PinMock, State as PinState, Transaction as PinTrans},
 };
 mod common;
 use crate::common::{destroy, new, BitFlags as BF, Register, DEV_ADDR};
