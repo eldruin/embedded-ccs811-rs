@@ -16,10 +16,10 @@ where
         let idle_mode = self.meas_mode_reg & 0b0000_1100;
         let meas_mode = match mode {
             MeasurementMode::Idle => idle_mode,
-            MeasurementMode::ConstantPower1s => idle_mode | 1 << 4,
-            MeasurementMode::PulseHeating10s => idle_mode | 2 << 4,
-            MeasurementMode::LowPowerPulseHeating60s => idle_mode | 3 << 4,
-            MeasurementMode::ConstantPower250ms => idle_mode | 4 << 4,
+            MeasurementMode::ConstantPower1s => idle_mode | (1 << 4),
+            MeasurementMode::PulseHeating10s => idle_mode | (2 << 4),
+            MeasurementMode::LowPowerPulseHeating60s => idle_mode | (3 << 4),
+            MeasurementMode::ConstantPower250ms => idle_mode | (4 << 4),
         };
         self.write_register_1byte(Register::MEAS_MODE, meas_mode)?;
         self.meas_mode_reg = meas_mode;
