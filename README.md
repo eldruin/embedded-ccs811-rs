@@ -2,10 +2,11 @@
 
 [![crates.io](https://img.shields.io/crates/v/embedded-ccs811.svg)](https://crates.io/crates/embedded-ccs811)
 [![Docs](https://docs.rs/embedded-ccs811/badge.svg)](https://docs.rs/embedded-ccs811)
+![Minimum Supported Rust Version](https://img.shields.io/badge/rustc-1.62+-blue.svg)
 [![Build Status](https://github.com/eldruin/embedded-ccs811-rs/workflows/Build/badge.svg)](https://github.com/eldruin/embedded-ccs811-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/embedded-ccs811-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/embedded-ccs811-rs?branch=master)
 
-This is a platform agnostic Rust driver for the CCS811 ultra-low power
+This is a platform-agnostic Rust driver for the CCS811 ultra-low power
 digital VOC sensor for monitoring indoor air quality (IAQ) using
 the [`embedded-hal`] traits.
 
@@ -46,7 +47,7 @@ with a microcontroller unit (MCU), which includes an Analog-to-Digital
 converter (ADC), and an I²C interface.
 
 CCS811 is based on ams unique micro-hotplate technology which enables a
-highly reliable solution for gas sensors, very fast cycle times and a 
+highly reliable solution for gas sensors, very fast cycle times and a
 significant reduction in average power consumption.
 
 The integrated MCU manages the sensor driver modes and measurements.
@@ -98,6 +99,11 @@ fn main() {
 
 For questions, issues, feature requests, and other changes, please file an
 [issue in the github project](https://github.com/eldruin/embedded-ccs811-rs/issues).
+
+## Minimum Supported Rust Version (MSRV)
+
+This crate is guaranteed to compile on stable Rust 1.62 and up. It *might*
+compile with older versions but that may change in any new patch release.
 
 ## License
 
