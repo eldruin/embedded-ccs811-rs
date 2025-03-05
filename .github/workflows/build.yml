@@ -1,8 +1,5 @@
-on:
-  push:
-  pull_request:
-
 name: Build
+on: [push, pull_request]
 
 env:
   RUSTFLAGS: '--deny warnings'
@@ -13,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable]
+        rust: [stable, 1.62.0]
         TARGET:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
@@ -30,7 +27,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.TARGET }}
+          targets: ${{ matrix.TARGET }}
 
       - name: Checkout CI scripts
         uses: actions/checkout@v4
@@ -42,50 +39,35 @@ jobs:
       - run: ./ci/patch-no-std.sh
         if: ${{ ! contains(matrix.TARGET, 'x86_64') }}
 
-      - name: Build
-        run: cargo build --target=${{ matrix.TARGET }}
+      - run: cargo build --target=${{ matrix.TARGET }}
 
   checks:
     name: Checks
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust: [stable]
-        TARGET:
-          - x86_64-unknown-linux-gnu
 
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.TARGET }}
+          targets: x86_64-unknown-linux-gnu
           components: rustfmt
 
-      - name: Doc
-        run: cargo doc
-
-      - name: Formatting
-        run: cargo fmt --all -- --check
+      - run: cargo doc
+      - run: cargo fmt --all -- --check
 
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust: [stable]
-        TARGET:
-          - x86_64-unknown-linux-gnu
 
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.TARGET }}
+          toolchain: 1.85.0
+          targets: x86_64-unknown-linux-gnu
           components: clippy
 
-      - run: cargo clippy --message-format=json --all-features
+      - run: cargo clippy --all-targets
 
   test:
     name: Tests
@@ -94,27 +76,26 @@ jobs:
       matrix:
         rust: [stable]
         TARGET: [x86_64-unknown-linux-gnu, x86_64-unknown-linux-musl]
+
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.TARGET }}
+          targets: ${{ matrix.TARGET }}
 
       - name: Test
         run: cargo test --target=${{ matrix.TARGET }}
+
+      - name: Build examples
+        run: cargo build --target=${{ matrix.TARGET }} --examples
 
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install stable toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
