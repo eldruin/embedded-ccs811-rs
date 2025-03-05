@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [1.0.0] - 2025-03-05
+
 ### Changed
 - [breaking-change] Upgrade to `embedded-hal` `1.0`
 - Updated dependencies
@@ -25,6 +27,7 @@ This driver is now functionally complete.
 Initial release to crates.io.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/eldruin/embedded-ccs811-rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/eldruin/embedded-ccs811-rs/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/eldruin/embedded-ccs811-rs/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/eldruin/embedded-ccs811-rs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/eldruin/embedded-ccs811-rs/releases/tag/v0.1.0
